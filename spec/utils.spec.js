@@ -254,4 +254,169 @@ describe('makeRefObj', () => {
   });
 });
 
-describe('formatComments', () => {});
+describe('formatComments', () => {
+  it('returns an empty arrray when passed an empty array', () => {
+    expect(formatComments([])).to.eql([]);
+  });
+  it('returns an array with a single object correctly formatted when passed an array containing a single object', () => {
+    const inputComments = [{
+      body: 'Itaque quisquam est similique et est perspiciatis reprehenderit voluptatem autem. Voluptatem accusantium eius error adipisci quibusdam doloribus.',
+      belongs_to: 'The People Tracking Every Touch, Pass And Tackle in the World Cup',
+      created_by: 'tickle122',
+      votes: -1,
+      created_at: 1468087638932,
+    }];
+    const refObj = {'The People Tracking Every Touch, Pass And Tackle in the World Cup': 1};
+    const expected = [{
+      body: 'Itaque quisquam est similique et est perspiciatis reprehenderit voluptatem autem. Voluptatem accusantium eius error adipisci quibusdam doloribus.',
+      article_id: 1,
+      author: 'tickle122',
+      votes: -1,
+      created_at: 1468087638932
+    }];
+    expect(formatComments(inputComments, refObj)).to.eql(expected);
+  });
+  it('returns an array with a many object correctly formatted when passed an array containing many objects', () => {
+    const inputComments = [{
+      body: 'Itaque quisquam est similique et est perspiciatis reprehenderit voluptatem autem. Voluptatem accusantium eius error adipisci quibusdam doloribus.',
+      belongs_to: 'A',
+      created_by: 'tickle122',
+      votes: -1,
+      created_at: 1468087638932,
+    },
+    {
+      body: 'Nobis consequatur animi. Ullam nobis quaerat voluptates veniam.',
+      belongs_to: 'B',
+      created_by: 'grumpy19',
+      votes: 7,
+      created_at: 1478813209256,
+    },
+    {
+      body: 'Qui sunt sit voluptas repellendus sed. Voluptatem et repellat fugiat. Rerum doloribus eveniet quidem vero aut sint officiis. Dolor facere et et architecto vero qui et perferendis dolorem. Magni quis ratione adipisci error assumenda ut. Id rerum eos facere sit nihil ipsam officia aspernatur odio.',
+      belongs_to: 'C',
+      created_by: 'grumpy19',
+      votes: 3,
+      created_at: 1504183900263,
+    },
+    {
+      body: 'Rerum voluptatem quam odio facilis quis illo unde. Ex blanditiis optio tenetur sunt. Cumque dolor ducimus et qui officia quasi non illum reiciendis.',
+      belongs_to: 'A',
+      created_by: 'happyamy2016',
+      votes: 4,
+      created_at: 1467709215383,
+    }];
+    const refObj = {'A': 1, 'B': 2, 'C': 3, 'D': 4};
+    const expected = [{
+      body: 'Itaque quisquam est similique et est perspiciatis reprehenderit voluptatem autem. Voluptatem accusantium eius error adipisci quibusdam doloribus.',
+      article_id: 1,
+      author: 'tickle122',
+      votes: -1,
+      created_at: 1468087638932,
+    },
+    {
+      body: 'Nobis consequatur animi. Ullam nobis quaerat voluptates veniam.',
+      article_id: 2,
+      author: 'grumpy19',
+      votes: 7,
+      created_at: 1478813209256,
+    },
+    {
+      body: 'Qui sunt sit voluptas repellendus sed. Voluptatem et repellat fugiat. Rerum doloribus eveniet quidem vero aut sint officiis. Dolor facere et et architecto vero qui et perferendis dolorem. Magni quis ratione adipisci error assumenda ut. Id rerum eos facere sit nihil ipsam officia aspernatur odio.',
+      article_id: 3,
+      author: 'grumpy19',
+      votes: 3,
+      created_at: 1504183900263,
+    },
+    {
+      body: 'Rerum voluptatem quam odio facilis quis illo unde. Ex blanditiis optio tenetur sunt. Cumque dolor ducimus et qui officia quasi non illum reiciendis.',
+      article_id: 1,
+      author: 'happyamy2016',
+      votes: 4,
+      created_at: 1467709215383,
+    }];
+    expect(formatComments(inputComments, refObj)).to.eql(expected);
+  });
+  it('the returned array is not the passed array', () => {
+    const inputComments = [{
+      body: 'Itaque quisquam est similique et est perspiciatis reprehenderit voluptatem autem. Voluptatem accusantium eius error adipisci quibusdam doloribus.',
+      belongs_to: 'A',
+      created_by: 'tickle122',
+      votes: -1,
+      created_at: 1468087638932,
+    },
+    {
+      body: 'Nobis consequatur animi. Ullam nobis quaerat voluptates veniam.',
+      belongs_to: 'B',
+      created_by: 'grumpy19',
+      votes: 7,
+      created_at: 1478813209256,
+    },
+    {
+      body: 'Qui sunt sit voluptas repellendus sed. Voluptatem et repellat fugiat. Rerum doloribus eveniet quidem vero aut sint officiis. Dolor facere et et architecto vero qui et perferendis dolorem. Magni quis ratione adipisci error assumenda ut. Id rerum eos facere sit nihil ipsam officia aspernatur odio.',
+      belongs_to: 'C',
+      created_by: 'grumpy19',
+      votes: 3,
+      created_at: 1504183900263,
+    },
+    {
+      body: 'Rerum voluptatem quam odio facilis quis illo unde. Ex blanditiis optio tenetur sunt. Cumque dolor ducimus et qui officia quasi non illum reiciendis.',
+      belongs_to: 'A',
+      created_by: 'happyamy2016',
+      votes: 4,
+      created_at: 1467709215383,
+    }];
+    const refObj = {'A': 1, 'B': 2, 'C': 3, 'D': 4};
+    const expected = [{
+      body: 'Itaque quisquam est similique et est perspiciatis reprehenderit voluptatem autem. Voluptatem accusantium eius error adipisci quibusdam doloribus.',
+      article_id: 1,
+      author: 'tickle122',
+      votes: -1,
+      created_at: 1468087638932,
+    },
+    {
+      body: 'Nobis consequatur animi. Ullam nobis quaerat voluptates veniam.',
+      article_id: 2,
+      author: 'grumpy19',
+      votes: 7,
+      created_at: 1478813209256,
+    },
+    {
+      body: 'Qui sunt sit voluptas repellendus sed. Voluptatem et repellat fugiat. Rerum doloribus eveniet quidem vero aut sint officiis. Dolor facere et et architecto vero qui et perferendis dolorem. Magni quis ratione adipisci error assumenda ut. Id rerum eos facere sit nihil ipsam officia aspernatur odio.',
+      article_id: 3,
+      author: 'grumpy19',
+      votes: 3,
+      created_at: 1504183900263,
+    },
+    {
+      body: 'Rerum voluptatem quam odio facilis quis illo unde. Ex blanditiis optio tenetur sunt. Cumque dolor ducimus et qui officia quasi non illum reiciendis.',
+      article_id: 1,
+      author: 'happyamy2016',
+      votes: 4,
+      created_at: 1467709215383,
+    }];
+    expect(formatComments(inputComments, refObj)).to.not.equal(inputComments);
+  });
+  it('the passed array is not mutated', () => {
+    const inputComments = [{
+      body: 'Itaque quisquam est similique et est perspiciatis reprehenderit voluptatem autem. Voluptatem accusantium eius error adipisci quibusdam doloribus.',
+      belongs_to: 'A',
+      created_by: 'tickle122',
+      votes: -1,
+      created_at: 1468087638932,
+    },
+    {
+      body: 'Nobis consequatur animi. Ullam nobis quaerat voluptates veniam.',
+      belongs_to: 'B',
+      created_by: 'grumpy19',
+      votes: 7,
+      created_at: 1478813209256,
+    }];
+    const refObj = {'A': 1, 'B': 2, 'C': 3, 'D': 4};
+    const copy = [];
+    inputComments.forEach(obj => {
+      copy.push({...obj});
+    });
+    formatComments(inputComments, refObj);
+    expect(inputComments).to.eql(copy);
+  });
+});
