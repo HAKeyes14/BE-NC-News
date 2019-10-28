@@ -272,7 +272,7 @@ describe('formatComments', () => {
       article_id: 1,
       author: 'tickle122',
       votes: -1,
-      created_at: 1468087638932
+      created_at: new Date(1468087638932)
     }];
     expect(formatComments(inputComments, refObj)).to.eql(expected);
   });
@@ -311,28 +311,28 @@ describe('formatComments', () => {
       article_id: 1,
       author: 'tickle122',
       votes: -1,
-      created_at: 1468087638932,
+      created_at: new Date(1468087638932),
     },
     {
       body: 'Nobis consequatur animi. Ullam nobis quaerat voluptates veniam.',
       article_id: 2,
       author: 'grumpy19',
       votes: 7,
-      created_at: 1478813209256,
+      created_at: new Date(1478813209256),
     },
     {
       body: 'Qui sunt sit voluptas repellendus sed. Voluptatem et repellat fugiat. Rerum doloribus eveniet quidem vero aut sint officiis. Dolor facere et et architecto vero qui et perferendis dolorem. Magni quis ratione adipisci error assumenda ut. Id rerum eos facere sit nihil ipsam officia aspernatur odio.',
       article_id: 3,
       author: 'grumpy19',
       votes: 3,
-      created_at: 1504183900263,
+      created_at: new Date(1504183900263),
     },
     {
       body: 'Rerum voluptatem quam odio facilis quis illo unde. Ex blanditiis optio tenetur sunt. Cumque dolor ducimus et qui officia quasi non illum reiciendis.',
       article_id: 1,
       author: 'happyamy2016',
       votes: 4,
-      created_at: 1467709215383,
+      created_at: new Date(1467709215383),
     }];
     expect(formatComments(inputComments, refObj)).to.eql(expected);
   });
@@ -366,34 +366,6 @@ describe('formatComments', () => {
       created_at: 1467709215383,
     }];
     const refObj = {'A': 1, 'B': 2, 'C': 3, 'D': 4};
-    const expected = [{
-      body: 'Itaque quisquam est similique et est perspiciatis reprehenderit voluptatem autem. Voluptatem accusantium eius error adipisci quibusdam doloribus.',
-      article_id: 1,
-      author: 'tickle122',
-      votes: -1,
-      created_at: 1468087638932,
-    },
-    {
-      body: 'Nobis consequatur animi. Ullam nobis quaerat voluptates veniam.',
-      article_id: 2,
-      author: 'grumpy19',
-      votes: 7,
-      created_at: 1478813209256,
-    },
-    {
-      body: 'Qui sunt sit voluptas repellendus sed. Voluptatem et repellat fugiat. Rerum doloribus eveniet quidem vero aut sint officiis. Dolor facere et et architecto vero qui et perferendis dolorem. Magni quis ratione adipisci error assumenda ut. Id rerum eos facere sit nihil ipsam officia aspernatur odio.',
-      article_id: 3,
-      author: 'grumpy19',
-      votes: 3,
-      created_at: 1504183900263,
-    },
-    {
-      body: 'Rerum voluptatem quam odio facilis quis illo unde. Ex blanditiis optio tenetur sunt. Cumque dolor ducimus et qui officia quasi non illum reiciendis.',
-      article_id: 1,
-      author: 'happyamy2016',
-      votes: 4,
-      created_at: 1467709215383,
-    }];
     expect(formatComments(inputComments, refObj)).to.not.equal(inputComments);
   });
   it('the passed array is not mutated', () => {

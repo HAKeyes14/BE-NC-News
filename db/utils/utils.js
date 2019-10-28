@@ -1,4 +1,4 @@
-exports.formatDates = list => {
+const formatDates = list => {
     const formattedArr = list.map(obj => {
         const formattedObj = {...obj};
         const formattedDate = new Date(obj.created_at);
@@ -8,7 +8,7 @@ exports.formatDates = list => {
     return formattedArr;
 };
 
-exports.makeRefObj = list => {
+const makeRefObj = list => {
     const refObj = list.reduce((ref, current) => {
         return {
             ...ref,
@@ -18,7 +18,7 @@ exports.makeRefObj = list => {
     return refObj;
 };
 
-exports.formatComments = (comments, articleRef) => {
+const formatComments = (comments, articleRef) => {
     const formattedComments = comments.map(comment => {
         return {
             author: comment.created_by,
@@ -28,5 +28,8 @@ exports.formatComments = (comments, articleRef) => {
             votes: comment.votes
         }
     });
-    return formattedComments;
+    const dateFormattedComments = formatDates(formattedComments);
+    return dateFormattedComments;
 };
+
+module.exports = {formatDates, makeRefObj, formatComments}
