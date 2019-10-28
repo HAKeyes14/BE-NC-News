@@ -3,4 +3,4 @@ const topicsRouter = require('./topics-router');
 
 apiRouter.use('/topics', topicsRouter);
 
-module.exports(apiRouter);
+module.exports = apiRouter;
