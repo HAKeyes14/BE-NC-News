@@ -8,6 +8,14 @@ exports.formatDates = list => {
     return formattedArr;
 };
 
-exports.makeRefObj = list => {};
+exports.makeRefObj = list => {
+    const refObj = list.reduce((ref, current) => {
+        return {
+            ...ref,
+            [current.title]: current.article_id
+        }
+    }, {})
+    return refObj;
+};
 
 exports.formatComments = (comments, articleRef) => {};

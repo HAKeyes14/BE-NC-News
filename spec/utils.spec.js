@@ -138,6 +138,120 @@ describe('formatDates', () => {
   });
 });
 
-describe('makeRefObj', () => {});
+describe('makeRefObj', () => {
+  it('returns an empty object when passed an empty array', () => {
+    expect(makeRefObj([])).to.eql({});
+  });
+  it('returns an object with a single key-value pair when passed an array containing one object', () => {
+    const input = [
+      {
+        article_id: 1,
+        title: 'Running a Node App',
+        topic: 'coding',
+        author: 'jessjelly',
+        body:
+          'This is part two of a series on how to get up and running with Systemd and Node.js. This part dives deeper into how to successfully run your app with systemd long-term, and how to set it up in a production environment.',
+        created_at: 1471522072389,
+      }
+    ];
+    const expected = {
+        'Running a Node App': 1
+      };
+    expect(makeRefObj(input)).to.eql(expected);
+  });
+  it('returns an object with a many key-value pairs when passed an array containing many objects', () => {
+    const input = [
+      {
+        article_id: 1,
+        title: 'A',
+        topic: 'coding',
+        author: 'jessjelly',
+        body:
+          'This is part two of a series on how to get up and running with Systemd and Node.js. This part dives deeper into how to successfully run your app with systemd long-term, and how to set it up in a production environment.',
+        created_at: 1471522072389,
+      },
+      {
+        article_id: 2,
+        title: 'B',
+        topic: 'coding',
+        author: 'jessjelly',
+        body:
+          'This is part two of a series on how to get up and running with Systemd and Node.js. This part dives deeper into how to successfully run your app with systemd long-term, and how to set it up in a production environment.',
+        created_at: 1471522072389,
+      },
+      {
+        article_id: 3,
+        title: 'C',
+        topic: 'coding',
+        author: 'jessjelly',
+        body:
+          'This is part two of a series on how to get up and running with Systemd and Node.js. This part dives deeper into how to successfully run your app with systemd long-term, and how to set it up in a production environment.',
+        created_at: 1471522072389,
+      },
+      {
+        article_id: 4,
+        title: 'D',
+        topic: 'coding',
+        author: 'jessjelly',
+        body:
+          'This is part two of a series on how to get up and running with Systemd and Node.js. This part dives deeper into how to successfully run your app with systemd long-term, and how to set it up in a production environment.',
+        created_at: 1471522072389,
+      }
+    ];
+    const expected = {
+        'A': 1,
+        'B': 2,
+        'C': 3,
+        'D': 4
+      };
+    expect(makeRefObj(input)).to.eql(expected);
+  });
+  it('the passed array is not mutated', () => {
+    const input = [
+      {
+        article_id: 1,
+        title: 'A',
+        topic: 'coding',
+        author: 'jessjelly',
+        body:
+          'This is part two of a series on how to get up and running with Systemd and Node.js. This part dives deeper into how to successfully run your app with systemd long-term, and how to set it up in a production environment.',
+        created_at: 1471522072389,
+      },
+      {
+        article_id: 2,
+        title: 'B',
+        topic: 'coding',
+        author: 'jessjelly',
+        body:
+          'This is part two of a series on how to get up and running with Systemd and Node.js. This part dives deeper into how to successfully run your app with systemd long-term, and how to set it up in a production environment.',
+        created_at: 1471522072389,
+      },
+      {
+        article_id: 3,
+        title: 'C',
+        topic: 'coding',
+        author: 'jessjelly',
+        body:
+          'This is part two of a series on how to get up and running with Systemd and Node.js. This part dives deeper into how to successfully run your app with systemd long-term, and how to set it up in a production environment.',
+        created_at: 1471522072389,
+      },
+      {
+        article_id: 4,
+        title: 'D',
+        topic: 'coding',
+        author: 'jessjelly',
+        body:
+          'This is part two of a series on how to get up and running with Systemd and Node.js. This part dives deeper into how to successfully run your app with systemd long-term, and how to set it up in a production environment.',
+        created_at: 1471522072389,
+      }
+    ];
+    const copy = [];
+    input.forEach(obj => {
+      copy.push({...obj});
+    });
+    makeRefObj(input);
+    expect(input).to.eql(copy);
+  });
+});
 
 describe('formatComments', () => {});
