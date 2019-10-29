@@ -89,3 +89,16 @@ exports.selectComments = (article_id, sort_by, order) => {
         } else return comments;
     });
 }
+
+exports.selectArticles = (sort_by, order, {author, topic}) => {
+    return connection('articles')
+    .leftJoin('comments', 'articles.article_id', 'comments.article_id')
+    .count({comment_count: 'comments.comment_id'})
+    .groupBy('articles.article_id')
+    .select('articles.*')
+    .orderBy(sort_by || 'created_at', order || 'desc')
+    .modify((query) => {
+        if(author) query.where({'articles.author': author});
+        if(topic) query.where({'articles.topic': topic});
+    })
+}

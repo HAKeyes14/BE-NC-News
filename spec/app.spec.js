@@ -59,6 +59,72 @@ describe('/api', () => {
         }); 
     });
     describe('/articles', () => {
+        it('GET: 200 - returns an array of all articles and their comment counts', () => {
+            return request(app)
+            .get('/api/articles')
+            .expect(200)
+            .then(({body:{articles}}) => {
+                expect(articles).to.have.lengthOf(12);
+                articles.forEach(article => {
+                    expect(article).to.have.keys(['article_id', 'body', 'title', 'votes', 'created_at', 'comment_count', 'topic', 'author']);
+                })
+            });
+        });
+        it('GET: 200 - returns an array of all articles and their comment counts sorted by descending date by default', () => {
+            return request(app)
+            .get('/api/articles')
+            .expect(200)
+            .then(({body:{articles}}) => {
+                expect(articles).to.have.lengthOf(12);
+                articles.forEach(article => {
+                    expect(article).to.have.keys(['article_id', 'body', 'title', 'votes', 'created_at', 'comment_count', 'topic', 'author']);
+                });
+                expect(articles).to.be.descendingBy('created_at');
+            });
+        });
+        it('GET: 200 - returns an array of all articles and their comment counts sorted as specified by the query', () => {
+            return request(app)
+            .get('/api/articles?sort_by=votes&order=asc')
+            .expect(200)
+            .then(({body:{articles}}) => {
+                expect(articles).to.have.lengthOf(12);
+                articles.forEach(article => {
+                    expect(article).to.have.keys(['article_id', 'body', 'title', 'votes', 'created_at', 'comment_count', 'topic', 'author']);
+                });
+                expect(articles).to.be.ascendingBy('votes');
+            });
+        });
+        it('GET: 200 - returns an array of all articles and their comment counts with the author specified by the query', () => {
+            return request(app)
+            .get('/api/articles?author=butter_bridge')
+            .expect(200)
+            .then(({body:{articles}}) => {
+                expect(articles).to.have.lengthOf(3);
+                articles.forEach(article => {
+                    expect(article).to.have.keys(['article_id', 'body', 'title', 'votes', 'created_at', 'comment_count', 'topic', 'author']);
+                    expect(article.author).to.equal('butter_bridge')
+                });
+                expect(articles).to.be.descendingBy('created_at');
+            });
+        });
+        it('GET: 200 - returns an array of all articles and their comment counts with the topic specified by the query', () => {
+            return request(app)
+            .get('/api/articles?topic=mitch')
+            .expect(200)
+            .then(({body:{articles}}) => {
+                expect(articles).to.have.lengthOf(11);
+                articles.forEach(article => {
+                    expect(article).to.have.keys(['article_id', 'body', 'title', 'votes', 'created_at', 'comment_count', 'topic', 'author']);
+                    expect(article.topic).to.equal('mitch')
+                });
+                expect(articles).to.be.descendingBy('created_at');
+            });
+        });
+        describe('ERRORS', () => {
+            it('', () => {
+                
+            });
+        });
         describe('/:article_id', () => {
             it('GET: 200 - returns the specified article and the comment count', () => {
                 return request(app)
