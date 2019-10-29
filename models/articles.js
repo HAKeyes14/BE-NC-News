@@ -3,7 +3,7 @@ const connection = require('../db/connection');
 exports.selectArticleById = (article_id) => {
     const article = connection('articles')
     .first('*')
-    .where('article_id', article_id);
+    .where({article_id});
     
     const count = connection('comments')
     .select('*')
@@ -24,6 +24,16 @@ exports.selectArticleById = (article_id) => {
     })
     .then(([article, count]) => {
         article.comment_count = count;
+        return article;
+    });
+}
+
+exports.updateArticleVotes = (article_id, inc_votes) => {
+    return connection('articles')
+    .where({article_id})
+    .increment('votes', inc_votes)
+    .returning('*')
+    .then(([article]) => {
         return article;
     });
 }

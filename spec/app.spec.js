@@ -77,6 +77,17 @@ describe('/api', () => {
                     });
                 });
             });
+            it('PATCH: 201 - returns the article with the votes updated', () => {
+                return request(app)
+                .patch('/api/articles/2')
+                .send({inc_votes: 100})
+                .expect(201)
+                .then(({body: {article}}) => {
+                    expect(article).to.have.keys(['article_id', 'body', 'title', 'votes', 'created_at', 'topic', 'author']);
+                    expect(article.article_id).to.equal(2);
+                    expect(article.votes).to.equal(100);
+                });
+            });
             describe('ERRORS', () => {
                 it('GET: 400 - returns an error msg explaining the article_id is invalid', () => {
                     return request(app)
