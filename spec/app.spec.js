@@ -76,16 +76,32 @@ describe('/api', () => {
                         expect(article.comment_count).to.equal(13);
                     });
                 });
-            });
-            it('PATCH: 201 - returns the article with the votes updated', () => {
-                return request(app)
-                .patch('/api/articles/2')
-                .send({inc_votes: 100})
-                .expect(201)
-                .then(({body: {article}}) => {
-                    expect(article).to.have.keys(['article_id', 'body', 'title', 'votes', 'created_at', 'topic', 'author']);
-                    expect(article.article_id).to.equal(2);
-                    expect(article.votes).to.equal(100);
+                it('PATCH: 201 - returns the article with the votes updated', () => {
+                    return request(app)
+                    .patch('/api/articles/2')
+                    .send({inc_votes: 100})
+                    .expect(201)
+                    .then(({body: {article}}) => {
+                        expect(article).to.have.keys(['article_id', 'body', 'title', 'votes', 'created_at', 'topic', 'author']);
+                        expect(article.article_id).to.equal(2);
+                        expect(article.votes).to.equal(100);
+                    });
+                });
+                describe('/comments', () => {
+                    it('POST: 201 - returns the added comment', () => {
+                        return request(app)
+                        .post('/api/articles/1/comments')
+                        .send({username: 'butter_bridge', body: 'hello, this is the body'})
+                        .expect(201)
+                        .then(({body: {comment}}) => {
+                            expect(comment.body).to.equal('hello, this is the body');
+                            expect(comment.author).to.equal('butter_bridge');
+                            expect(comment.votes).to.equal(0);
+                            expect(comment.article_id).to.equal(1);
+                            expect(comment.comment_id).to.equal(19);
+                            expect(comment).to.include.keys(['created_at']);
+                        });
+                    });
                 });
             });
             describe('ERRORS', () => {
@@ -132,23 +148,61 @@ describe('/api', () => {
                         expect(msg).to.equal('"inc_votes" must be the only item on the body in order to update "votes"');
                     });
                 });
-            });
-            describe('/comments', () => {
-                it('POST: 201 - returns the added comment', () => {
+                it('PATCH: 404 - returns an error msg explaining the article_id does not exist', () => {
+                    return request(app)
+                    .patch('/api/articles/10000')
+                    .send({inc_votes: 100})
+                    .expect(404)
+                    .then(({body: {msg}}) => {
+                        expect(msg).to.equal('Article with article_id: 10000 does not exist.');
+                    });
+                });
+                it('PATCH: 400 - returns an error msg explaining the article_id is invalid', () => {
+                    return request(app)
+                    .patch('/api/articles/not-a-number')
+                    .send({inc_votes: 100})
+                    .expect(400)
+                    .then(({body: {msg}}) => {
+                        expect(msg).to.equal('invalid input syntax for type integer: "not-a-number"');
+                    });
+                });
+                it('POST: 400 - returns an error msg explaining the article_id is invalid', () => {
+                    return request(app)
+                    .post('/api/articles/not-a-number/comments')
+                    .send({username: 'butter_bridge', body: 'hello, this is the body'})
+                    .expect(400)
+                    .then(({body: {msg}}) => {
+                        expect(msg).to.equal('invalid input syntax for type integer: "not-a-number"');
+                    });
+                });
+                it('POST: 404 - returns an error msg explaining the article_id does not exist', () => {
+                    return request(app)
+                    .post('/api/articles/100000/comments')
+                    .send({username: 'butter_bridge', body: 'hello, this is the body'})
+                    .expect(404)
+                    .then(({body: {msg}}) => {
+                        expect(msg).to.equal('insert or update on table "comments" violates foreign key constraint "comments_article_id_foreign"');
+                    });
+                });
+                it('POST: 400 - returns an error msg explaining there is no body on the body', () => {
                     return request(app)
                     .post('/api/articles/1/comments')
-                    .send({username: 'butter_bridge', body: 'hello, this is the body'})
-                    .expect(201)
-                    .then(({body: {comment}}) => {
-                        expect(comment.body).to.equal('hello, this is the body');
-                        expect(comment.author).to.equal('butter_bridge');
-                        expect(comment.votes).to.equal(0);
-                        expect(comment.article_id).to.equal(1);
-                        expect(comment.comment_id).to.equal(19);
-                        expect(comment).to.include.keys(['created_at']);
+                    .send({username: 'butter_bridge'})
+                    .expect(400)
+                    .then(({body: {msg}}) => {
+                        expect(msg).to.equal('null value in column "body" violates not-null constraint');
+                    });
+                });
+                it('POST: 400 - returns an error msg explaining there is no username on the body', () => {
+                    return request(app)
+                    .post('/api/articles/1/comments')
+                    .send({body: 'this is the body'})
+                    .expect(400)
+                    .then(({body: {msg}}) => {
+                        expect(msg).to.equal('null value in column "author" violates not-null constraint');
                     });
                 });
             });
         });
-    });
+});
 

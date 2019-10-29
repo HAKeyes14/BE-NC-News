@@ -25,5 +25,6 @@ exports.postComment = (req, res, next) => {
     addComment(article_id, body)
     .then(comment => {
         res.status(201).send({comment});
-    });
+    })
+    .catch(next);
 }

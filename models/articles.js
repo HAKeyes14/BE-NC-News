@@ -18,7 +18,7 @@ exports.selectArticleById = (article_id) => {
             return Promise.reject({
                 status: 404,
                 message: `Article with article_id: ${article_id} does not exist.`
-            })
+            });
         }
         return [article, count];
     })
@@ -46,7 +46,15 @@ exports.updateArticleVotes = (article_id, body) => {
     .where({article_id})
     .increment('votes', inc_votes)
     .returning('*')
-    .then(([article]) => article);
+    .then(([article]) => {
+        if(!article) {
+            return Promise.reject({
+                status: 404,
+                message: `Article with article_id: ${article_id} does not exist.`
+            });
+        }
+        return article;
+    });
 }
 
 exports.addComment = (article_id, {username, body}) => {
@@ -58,5 +66,7 @@ exports.addComment = (article_id, {username, body}) => {
     return connection('comments')
     .insert(newComment)
     .returning('*')
-    .then(([comment]) => comment)
+    .then(([comment]) => {
+        return comment
+    });
 }
