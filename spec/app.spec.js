@@ -44,7 +44,7 @@ describe('/api', () => {
                     .get('/api/users/not-a-username')
                     .expect(404)
                     .then(({body: {msg}}) => {
-                        expect(msg).to.equal('404 - User with username: not-a-username does not exist.');
+                        expect(msg).to.equal('User with username: not-a-username does not exist.');
                     });
                 });
                 it('GET: 400 - returns an error message if the username is invalid', () => {
@@ -52,7 +52,7 @@ describe('/api', () => {
                     .get('/api/users/this-username-is-longer-than-twenty-characters')
                     .expect(400)
                     .then(({body: {msg}}) => {
-                        expect(msg).to.equal('400 - Username: this-username-is-longer-than-twenty-characters is not a valid username.');
+                        expect(msg).to.equal('Username: this-username-is-longer-than-twenty-characters is not a valid username.');
                     });
                 });
             });
@@ -74,6 +74,24 @@ describe('/api', () => {
                         expect(article.created_at).to.equal('2018-11-15T12:21:54.171Z');
                         expect(article.title).to.equal('Living in the shadow of a great man');
                         expect(article.comment_count).to.equal(13);
+                    });
+                });
+            });
+            describe('ERRORS', () => {
+                it('GET: 400 - returns an error msg explaining the article_id is invalid', () => {
+                    return request(app)
+                    .get('/api/articles/hello')
+                    .expect(400)
+                    .then(({body: {msg}}) => {
+                        expect(msg).to.equal('invalid input syntax for type integer: "hello"');
+                    });
+                });
+                it('GET: 404 - returns an error msg explaining the article_id does not exist', () => {
+                    return request(app)
+                    .get('/api/articles/1000000')
+                    .expect(404)
+                    .then(({body: {msg}}) => {
+                        expect(msg).to.equal('Article with article_id: 1000000 does not exist.');
                     });
                 });
             });

@@ -14,6 +14,15 @@ exports.selectArticleById = (article_id) => {
 
     return Promise.all([article, count])
     .then(([article, count]) => {
+        if(!article) {
+            return Promise.reject({
+                status: 404,
+                message: `Article with article_id: ${article_id} does not exist.`
+            })
+        }
+        return [article, count];
+    })
+    .then(([article, count]) => {
         article.comment_count = count;
         return article;
     });
