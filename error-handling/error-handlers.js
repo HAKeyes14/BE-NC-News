@@ -1,6 +1,31 @@
+const createMessage = (err) => {
+    return err.message.split(' - ')[1];
+}
 
 exports.customErrorHandler = (err, req, res, next) => {
+    //console.log(err);
     if(err.status) {
         res.status(err.status).send({msg: err.message});
-    }
+    } else next(err);
 }
+
+exports.psqlErrorHandler = (err, req, res, next) => {
+    const psqlCodes = {
+        '22P02': {
+            status: 400,
+            msg: createMessage(err)
+        }
+    }
+
+    const thisError = psqlCodes[err.code];
+    
+    if (thisError) {
+        res.status(thisError.status).send({msg: thisError.msg});
+    } else next(err);
+
+}
+
+exports.serverErrorHandler = (err, req, res, next) => {
+        res.status(500).send({msg: "something is wrong!"});
+}
+
