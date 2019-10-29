@@ -8,10 +8,10 @@ exports.selectUserByUsername = (username) => {
         });
     }
     return connection('users')
-    .select('*')
+    .first('*')
     .where('username', username)
     .then(user => {
-        if (!user.length) {
+        if (!user) {
             return Promise.reject({
                 status: 404,
                 message: `404 - User with username: ${username} does not exist.`,

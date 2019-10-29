@@ -71,8 +71,9 @@ describe('/api', () => {
                         expect(article.topic).to.equal('mitch');
                         expect(article.body).to.equal('I find this existence challenging');
                         expect(article.author).to.equal('butter_bridge');
-                        expect(article.created_at).to.equal(new Date(1542284514171));
+                        expect(article.created_at).to.equal('2018-11-15T12:21:54.171Z');
                         expect(article.title).to.equal('Living in the shadow of a great man');
+                        expect(article.comment_count).to.equal(13);
                     });
                 });
             });
