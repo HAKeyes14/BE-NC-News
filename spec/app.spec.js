@@ -105,6 +105,33 @@ describe('/api', () => {
                         expect(msg).to.equal('Article with article_id: 1000000 does not exist.');
                     });
                 });
+                it('PATCH: 400 - returns an error msg explaining inc_votes must be a number', () => {
+                    return request(app)
+                    .patch('/api/articles/2')
+                    .send({inc_votes: 'not-a-number'})
+                    .expect(400)
+                    .then(({body: {msg}}) => {
+                        expect(msg).to.equal('invalid input syntax for type integer: "NaN"');
+                    });
+                });
+                it('PATCH: 400 - returns an error msg explaining inc_votes must be on the body', () => {
+                    return request(app)
+                    .patch('/api/articles/2')
+                    .send({not_inc_votes: 100})
+                    .expect(400)
+                    .then(({body: {msg}}) => {
+                        expect(msg).to.equal('"inc_votes" must be included on the body in order to update "votes"');
+                    });
+                });
+                it('PATCH: 400 - returns an error msg explaining inc_votes must be the only thing on the body', () => {
+                    return request(app)
+                    .patch('/api/articles/2')
+                    .send({inc_votes: 100, not_inc_votes: 100})
+                    .expect(400)
+                    .then(({body: {msg}}) => {
+                        expect(msg).to.equal('"inc_votes" must be the only item on the body in order to update "votes"');
+                    });
+                });
             });
         });
     });

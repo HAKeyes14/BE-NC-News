@@ -28,7 +28,20 @@ exports.selectArticleById = (article_id) => {
     });
 }
 
-exports.updateArticleVotes = (article_id, inc_votes) => {
+exports.updateArticleVotes = (article_id, body) => {
+    if(!body.inc_votes) {
+        return Promise.reject({
+            status: 400,
+            message: '"inc_votes" must be included on the body in order to update "votes"'
+        });
+    }
+    if(Object.keys(body).length !== 1) {
+        return Promise.reject({
+            status: 400,
+            message: '"inc_votes" must be the only item on the body in order to update "votes"'
+        });
+    }
+    const inc_votes = body.inc_votes;
     return connection('articles')
     .where({article_id})
     .increment('votes', inc_votes)
