@@ -1,29 +1,20 @@
 const connection = require('../db/connection');
 
 exports.selectArticleById = (article_id) => {
-    const article = connection('articles')
-    .first('*')
-    .where({article_id});
-    
-    const count = connection('comments')
-    .select('*')
-    .where({article_id})
-    .then(comments => {
-        return comments.length
-    });
-
-    return Promise.all([article, count])
-    .then(([article, count]) => {
+    return connection('articles')
+    .leftJoin('comments', 'articles.article_id', 'comments.article_id')
+    .count({comment_count: 'comments.comment_id'})
+    .groupBy('articles.article_id')
+    .select('articles.*')
+    .where('articles.article_id', article_id)
+    .first()
+    .then((article) => {
         if(!article) {
             return Promise.reject({
                 status: 404,
                 message: `Article with article_id: ${article_id} does not exist.`
             });
         }
-        return [article, count];
-    })
-    .then(([article, count]) => {
-        article.comment_count = count;
         return article;
     });
 }
@@ -68,5 +59,33 @@ exports.addComment = (article_id, {username, body}) => {
     .returning('*')
     .then(([comment]) => {
         return comment
+    });
+}
+
+exports.selectComments = (article_id, sort_by, order) => {
+    if (order !== undefined && order !== 'asc' && order !== 'desc') {
+        return Promise.reject({
+            status: 400,
+            message: `Order: "${order}" is not allowed.`
+        });
+    }
+    return connection('comments')
+    .select('*')
+    .where({article_id})
+    .orderBy(sort_by || 'created_at', order || 'desc')
+    .then(comments => {
+        if (!comments.length) {
+            return connection('articles')
+            .select('*')
+            .where({article_id})
+            .then(([article]) => {
+                if(!article) {
+                    return Promise.reject({
+                        status: 404,
+                        message: `Article with article_id: ${article_id} does not exist.`
+                    });
+                } else return [];
+            });
+        } else return comments;
     });
 }
