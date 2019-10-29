@@ -38,22 +38,22 @@ describe('/api', () => {
                     expect(user.avatar_url).to.equal('https://www.healthytherapies.com/wp-content/uploads/2016/06/Lime3.jpg');
                 });
             });
-            describe('ERRORS', () => {
-                it('GET: 404 - returns an error message if the username is valid but does not exist', () => {
-                    return request(app)
-                    .get('/api/users/not-a-username')
-                    .expect(404)
-                    .then(({body: {msg}}) => {
-                        expect(msg).to.equal('User with username: not-a-username does not exist.');
-                    });
+        });
+        describe('ERRORS', () => {
+            it('GET: 404 - returns an error message if the username is valid but does not exist', () => {
+                return request(app)
+                .get('/api/users/not-a-username')
+                .expect(404)
+                .then(({body: {msg}}) => {
+                    expect(msg).to.equal('User with username: not-a-username does not exist.');
                 });
-                it('GET: 400 - returns an error message if the username is invalid', () => {
-                    return request(app)
-                    .get('/api/users/this-username-is-longer-than-twenty-characters')
-                    .expect(400)
-                    .then(({body: {msg}}) => {
-                        expect(msg).to.equal('Username: this-username-is-longer-than-twenty-characters is not a valid username.');
-                    });
+            });
+            it('GET: 400 - returns an error message if the username is invalid', () => {
+                return request(app)
+                .get('/api/users/this-username-is-longer-than-twenty-characters')
+                .expect(400)
+                .then(({body: {msg}}) => {
+                    expect(msg).to.equal('Username: this-username-is-longer-than-twenty-characters is not a valid username.');
                 });
             });
         });
@@ -130,6 +130,22 @@ describe('/api', () => {
                     .expect(400)
                     .then(({body: {msg}}) => {
                         expect(msg).to.equal('"inc_votes" must be the only item on the body in order to update "votes"');
+                    });
+                });
+            });
+            describe('/comments', () => {
+                it('POST: 201 - returns the added comment', () => {
+                    return request(app)
+                    .post('/api/articles/1/comments')
+                    .send({username: 'butter_bridge', body: 'hello, this is the body'})
+                    .expect(201)
+                    .then(({body: {comment}}) => {
+                        expect(comment.body).to.equal('hello, this is the body');
+                        expect(comment.author).to.equal('butter_bridge');
+                        expect(comment.votes).to.equal(0);
+                        expect(comment.article_id).to.equal(1);
+                        expect(comment.comment_id).to.equal(19);
+                        expect(comment).to.include.keys(['created_at']);
                     });
                 });
             });

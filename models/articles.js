@@ -46,7 +46,17 @@ exports.updateArticleVotes = (article_id, body) => {
     .where({article_id})
     .increment('votes', inc_votes)
     .returning('*')
-    .then(([article]) => {
-        return article;
-    });
+    .then(([article]) => article);
+}
+
+exports.addComment = (article_id, {username, body}) => {
+    const newComment = {
+        author: username,
+        body,
+        article_id
+    }
+    return connection('comments')
+    .insert(newComment)
+    .returning('*')
+    .then(([comment]) => comment)
 }
