@@ -371,5 +371,17 @@ describe('/api', () => {
                 });
             });
         });
+    describe('/comments', () => {
+        it('PATCH: 201 - returns a comment with the votes incremented by the amount on the body', () => {
+            return request(app)
+            .patch('/api/comments/1')
+            .send({inc_votes: 50})
+            .expect(201)
+            .then(({body: {comment}}) => {
+                expect(comment.comment_id).to.equal(1);
+                expect(comment.votes).to.equal(66);
+            });
+        });
+    });
 });
 
