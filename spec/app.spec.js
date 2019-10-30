@@ -300,7 +300,7 @@ describe('/api', () => {
             it('GET: 400 - returns an error msg explaining that author is not in the database', () => {
                 return request(app)
                 .get('/api/articles?author=not-an-author')
-                .expect(400)
+                .expect(404)
                 .then(({body:{msg}}) => {
                     expect(msg).to.equal('Author: not-an-author does not exist.');
                 });
@@ -308,7 +308,7 @@ describe('/api', () => {
             it('GET: 400 - returns an error msg explaining that topic is not in the database', () => {
                 return request(app)
                 .get('/api/articles?topic=not-a-topic')
-                .expect(400)
+                .expect(404)
                 .then(({body:{msg}}) => {
                     expect(msg).to.equal('Topic: not-a-topic does not exist.');
                 });

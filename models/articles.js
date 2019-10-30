@@ -113,7 +113,7 @@ exports.selectArticles = (sort_by, order, {author, topic}) => {
                 .then(([user]) => {
                     if(!user) {
                         return Promise.reject({
-                            status: 400,
+                            status: 404,
                             message: `Author: ${author} does not exist.`
                         });
                     } 
@@ -126,7 +126,7 @@ exports.selectArticles = (sort_by, order, {author, topic}) => {
                 .then(([topics]) => {
                     if(!topics) {
                         return Promise.reject({
-                            status: 400,
+                            status: 404,
                             message: `Topic: ${topic} does not exist.`
                         });
                     }
