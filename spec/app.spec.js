@@ -12,6 +12,131 @@ describe('/api', () => {
         return connection.seed.run();
     });
     after(() => connection.destroy());
+    it('GET: 200 - returns a JSON describing all the available endpoints on the API', () => {
+        return request(app)
+        .get('/api')
+        .expect(200)
+        .then(({body: {endpoints}}) => {
+            expect(endpoints).to.eql(
+                {
+                    "GET /api": {
+                    "description": "serves up a json representation of all the available endpoints of the api"
+                    },
+                    "GET /api/topics": {
+                    "description": "serves an array of all topics",
+                    "queries": [],
+                    "exampleResponse": {
+                        "topics": [{ "slug": "football", "description": "Footie!" }]
+                    }
+                    },
+                    "GET /api/users/:username": {
+                    "description": "serves the user with the username in the parameter",
+                    "queries": [],
+                    "exampleResponse": {
+                        "topics": { "username": "aUsername", "avatar_url": "aURL", "name": "aName" }
+                    }
+                    },
+                    "GET /api/articles": {
+                    "description": "serves an array of all topics",
+                    "queries": ["author", "topic", "sort_by", "order"],
+                    "exampleResponse": {
+                        "articles": [
+                        {
+                            "title": "Seafood substitutions are increasing",
+                            "topic": "cooking",
+                            "author": "weegembump",
+                            "created_at": 1527695953341,
+                            "votes": 0,
+                            "comment_count": 4
+                        }
+                        ]
+                    }
+                    },
+                    "GET /api/articles/:article_id": {
+                    "description": "serves the article specified by the parameter",
+                    "queries": [],
+                    "exampleResponse": {
+                        "article": {
+                        "title": "Seafood substitutions are increasing",
+                        "topic": "cooking",
+                        "author": "weegembump",
+                        "body": "Text from the article..",
+                        "created_at": 1527695953341,
+                        "votes": 0,
+                        "comment_count": 3,
+                        "article_id": 1
+                        }
+                    }
+                    },
+                    "PATCH /api/articles/:article_id": {
+                    "description": "updates the votes of the article specified by the parameter by the amount specified in the body",
+                    "queries": [],
+                    "body": {"inc_votes": 5},
+                    "exampleResponse": {
+                        "article": {
+                        "title": "Seafood substitutions are increasing",
+                        "topic": "cooking",
+                        "author": "weegembump",
+                        "body": "Text from the article..",
+                        "created_at": 1527695953341,
+                        "votes": 5,
+                        "article_id": 1
+                        }
+                    }
+                    },
+                    "POST /api/articles/:article_id/comments": {
+                    "description": "adds the comment on the body to the comments table, with the article_id as specified by the parameter",
+                    "queries": [],
+                    "body": {"username": "aUsername", "body": "aBody"},
+                    "exampleResponse": {
+                        "comment": {
+                        "comment_id": "cooking",
+                        "author": "aUsername",
+                        "body": "aBody",
+                        "created_at": 1527695953341,
+                        "votes": 5,
+                        "article_id": 1
+                        }
+                    }
+                    },
+                    "GET /api/articles/:article_id/comments": {
+                    "description": "serves an array of all comments with the article_id as specified by the parameter",
+                    "queries": ["sort_by", "order"],
+                    "exampleResponse": {
+                        "comment": [{
+                        "comment_id": "cooking",
+                        "author": "aUsername",
+                        "body": "aBody",
+                        "created_at": 1527695953341,
+                        "votes": 5,
+                        "article_id": 1
+                        }]
+                    }
+                    },
+                    "PATCH /api/comments/:comment_id": {
+                    "description": "updates the votes of the comment specified by the parameter by the amount specified on the body",
+                    "queries": [],
+                    "body": {"inc_votes": 5},
+                    "exampleResponse": {
+                        "comment": {
+                        "comment_id": "cooking",
+                        "author": "aUsername",
+                        "body": "aBody",
+                        "created_at": 1527695953341,
+                        "votes": 10,
+                        "article_id": 1
+                        }
+                    }
+                    },
+                    "DELETE /api/comments/:comment_id": {
+                    "description": "deletes the comment specified by the parameter",
+                    "queries": [],
+                    "exampleResponse": {}
+                    }
+                }
+            )
+        });
+    });
     describe('/topics', () => {
         it('GET: 200 - returns an array of all the topics', () => {
             return request(app)
@@ -522,6 +647,17 @@ describe('/api', () => {
         });
     });
     describe('ERRORS', () => {
+        it('INVALID METHODS: 405', () => {
+            const invalidMethods = ['patch', 'post', 'put', 'delete'];
+            const methodPromises = invalidMethods.map((method) => {
+                return request(app)[method]('/api')
+                .expect(405)
+                .then(({ body: { msg } }) => {
+                    expect(msg).to.equal('method not allowed');
+                });
+            });
+            return Promise.all(methodPromises);
+        });
         it('ROUTE NOT FOUND: 404 - returns an errer msg explaining the route was not found', () => {
             return request(app)
             .get('/api/rticles')
