@@ -28,3 +28,22 @@ exports.updateCommentVotes = (comment_id, body) => {
         return comment;
     });
 }
+
+exports.removeComment = (comment_id) => {
+    return connection('comments')
+    .first('*')
+    .where({comment_id})
+    .then(comment => {
+        if(!comment) {
+            return Promise.reject({
+                status: 404, 
+                message: `Comment with comment_id: ${comment_id} does not exist.`
+            });
+        }
+    })
+    .then(() => {
+        return connection('comments')
+        .where({comment_id})
+        .del();
+    }); 
+}

@@ -383,6 +383,11 @@ describe('/api', () => {
                     expect(comment.votes).to.equal(15);
                 });
             });
+            it('DELETE: 204', () => {
+                return request(app)
+                .delete('/api/comments/1')
+                .expect(204);
+            });
             describe('ERRORS', () => {
                 it('PATCH: 400 - returns an error msg explaining inc_votes must be a number', () => {
                     return request(app)
@@ -428,6 +433,22 @@ describe('/api', () => {
                     .then(({body: {msg}}) => {
                         expect(msg).to.equal('invalid input syntax for type integer: "not-a-number"');
                     });
+                });
+                it('DELETE: 404 - returns an error msg explaining the comment_id does not exist', () => {
+                    return request(app)
+                    .delete('/api/comments/1000000')
+                    .expect(404)
+                    .then(({body: {msg}}) => {
+                        expect(msg).to.equal('Comment with comment_id: 1000000 does not exist.')
+                    })
+                });
+                it('DELETE: 400 - returns an error msg explaining the comment_id is invalid', () => {
+                    return request(app)
+                    .delete('/api/comments/not-a-number')
+                    .expect(400)
+                    .then(({body: {msg}}) => {
+                        expect(msg).to.equal('invalid input syntax for type integer: "not-a-number"')
+                    })
                 });
             });
         });
