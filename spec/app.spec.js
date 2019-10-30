@@ -331,15 +331,26 @@ describe('/api', () => {
                         expect(+article.comment_count).to.equal(13);
                     });
                 });
-                it('PATCH: 201 - returns the article with the votes updated', () => {
+                it('PATCH: 200 - returns the article with the votes updated', () => {
                     return request(app)
                     .patch('/api/articles/2')
                     .send({inc_votes: 100})
-                    .expect(201)
+                    .expect(200)
                     .then(({body: {article}}) => {
                         expect(article).to.have.keys(['article_id', 'body', 'title', 'votes', 'created_at', 'topic', 'author']);
                         expect(article.article_id).to.equal(2);
                         expect(article.votes).to.equal(100);
+                    });
+                });
+                it('PATCH: 200 - returns the unchanged article if inc_votes is not on the body', () => {
+                    return request(app)
+                    .patch('/api/articles/2')
+                    .send({not_inc_votes: 100})
+                    .expect(200)
+                    .then(({body: {article}}) => {
+                        expect(article).to.have.keys(['article_id', 'body', 'title', 'votes', 'created_at', 'topic', 'author']);
+                        expect(article.article_id).to.equal(2);
+                        expect(article.votes).to.equal(0);
                     });
                 });
                 describe('ERRORS', () => {
@@ -379,15 +390,15 @@ describe('/api', () => {
                             expect(msg).to.equal('invalid input syntax for type integer: "NaN"');
                         });
                     });
-                    it('PATCH: 400 - returns an error msg explaining inc_votes must be on the body', () => {
-                        return request(app)
-                        .patch('/api/articles/2')
-                        .send({not_inc_votes: 100})
-                        .expect(400)
-                        .then(({body: {msg}}) => {
-                            expect(msg).to.equal('"inc_votes" must be included on the body in order to update "votes"');
-                        });
-                    });
+                    // it('PATCH: 400 - returns an error msg explaining inc_votes must be on the body', () => {
+                    //     return request(app)
+                    //     .patch('/api/articles/2')
+                    //     .send({not_inc_votes: 100})
+                    //     .expect(400)
+                    //     .then(({body: {msg}}) => {
+                    //         expect(msg).to.equal('"inc_votes" must be included on the body in order to update "votes"');
+                    //     });
+                    // });
                     it('PATCH: 400 - returns an error msg explaining inc_votes must be the only thing on the body', () => {
                         return request(app)
                         .patch('/api/articles/2')
@@ -555,14 +566,24 @@ describe('/api', () => {
         });
     describe('/comments', () => {
         describe('/:comment_id', () => {
-            it('PATCH: 201 - returns a comment with the votes incremented by the amount on the body', () => {
+            it('PATCH: 200 - returns a comment with the votes incremented by the amount on the body', () => {
                 return request(app)
                 .patch('/api/comments/1')
                 .send({inc_votes: -1})
-                .expect(201)
+                .expect(200)
                 .then(({body: {comment}}) => {
                     expect(comment.comment_id).to.equal(1);
                     expect(comment.votes).to.equal(15);
+                });
+            });
+            it('PATCH: 200 - returns an unchanged comment if inc_votes is not on the body', () => {
+                return request(app)
+                .patch('/api/comments/1')
+                .send({not_inc_votes: 20})
+                .expect(200)
+                .then(({body: {comment}}) => {
+                    expect(comment.comment_id).to.equal(1);
+                    expect(comment.votes).to.equal(16);
                 });
             });
             it('DELETE: 204', () => {
@@ -591,15 +612,15 @@ describe('/api', () => {
                         expect(msg).to.equal('invalid input syntax for type integer: "NaN"');
                     });
                 });
-                it('PATCH: 400 - returns an error msg explaining inc_votes must be on the body', () => {
-                    return request(app)
-                    .patch('/api/comments/2')
-                    .send({not_inc_votes: 100})
-                    .expect(400)
-                    .then(({body: {msg}}) => {
-                        expect(msg).to.equal('"inc_votes" must be included on the body in order to update "votes"');
-                    });
-                });
+                // it('PATCH: 400 - returns an error msg explaining inc_votes must be on the body', () => {
+                //     return request(app)
+                //     .patch('/api/comments/2')
+                //     .send({not_inc_votes: 100})
+                //     .expect(400)
+                //     .then(({body: {msg}}) => {
+                //         expect(msg).to.equal('"inc_votes" must be included on the body in order to update "votes"');
+                //     });
+                // });
                 it('PATCH: 400 - returns an error msg explaining inc_votes must be the only thing on the body', () => {
                     return request(app)
                     .patch('/api/comments/2')

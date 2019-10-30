@@ -1,11 +1,9 @@
 const connection = require('../db/connection');
 
 exports.updateCommentVotes = (comment_id, body) => {
+    let inc_votes = body.inc_votes;
     if(!body.inc_votes) {
-        return Promise.reject({
-            status: 400,
-            message: '"inc_votes" must be included on the body in order to update "votes"'
-        });
+        inc_votes = 0;
     }
     if(Object.keys(body).length !== 1) {
         return Promise.reject({
@@ -13,7 +11,7 @@ exports.updateCommentVotes = (comment_id, body) => {
             message: '"inc_votes" must be the only item on the body in order to update "votes"'
         });
     }
-    const inc_votes = body.inc_votes;
+    
     return connection('comments')
     .increment('votes', inc_votes)
     .where({comment_id})
