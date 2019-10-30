@@ -66,7 +66,7 @@ describe('/api', () => {
             .then(({body:{articles}}) => {
                 expect(articles).to.have.lengthOf(12);
                 articles.forEach(article => {
-                    expect(article).to.have.keys(['article_id', 'body', 'title', 'votes', 'created_at', 'comment_count', 'topic', 'author']);
+                    expect(article).to.have.keys(['article_id', 'title', 'votes', 'created_at', 'comment_count', 'topic', 'author']);
                 })
             });
         });
@@ -77,7 +77,7 @@ describe('/api', () => {
             .then(({body:{articles}}) => {
                 expect(articles).to.have.lengthOf(12);
                 articles.forEach(article => {
-                    expect(article).to.have.keys(['article_id', 'body', 'title', 'votes', 'created_at', 'comment_count', 'topic', 'author']);
+                    expect(article).to.have.keys(['article_id', 'title', 'votes', 'created_at', 'comment_count', 'topic', 'author']);
                 });
                 expect(articles).to.be.descendingBy('created_at');
             });
@@ -89,7 +89,7 @@ describe('/api', () => {
             .then(({body:{articles}}) => {
                 expect(articles).to.have.lengthOf(12);
                 articles.forEach(article => {
-                    expect(article).to.have.keys(['article_id', 'body', 'title', 'votes', 'created_at', 'comment_count', 'topic', 'author']);
+                    expect(article).to.have.keys(['article_id', 'title', 'votes', 'created_at', 'comment_count', 'topic', 'author']);
                 });
                 expect(articles).to.be.ascendingBy('votes');
             });
@@ -101,7 +101,7 @@ describe('/api', () => {
             .then(({body:{articles}}) => {
                 expect(articles).to.have.lengthOf(3);
                 articles.forEach(article => {
-                    expect(article).to.have.keys(['article_id', 'body', 'title', 'votes', 'created_at', 'comment_count', 'topic', 'author']);
+                    expect(article).to.have.keys(['article_id', 'title', 'votes', 'created_at', 'comment_count', 'topic', 'author']);
                     expect(article.author).to.equal('butter_bridge')
                 });
                 expect(articles).to.be.descendingBy('created_at');
@@ -114,7 +114,7 @@ describe('/api', () => {
             .then(({body:{articles}}) => {
                 expect(articles).to.have.lengthOf(11);
                 articles.forEach(article => {
-                    expect(article).to.have.keys(['article_id', 'body', 'title', 'votes', 'created_at', 'comment_count', 'topic', 'author']);
+                    expect(article).to.have.keys(['article_id', 'title', 'votes', 'created_at', 'comment_count', 'topic', 'author']);
                     expect(article.topic).to.equal('mitch')
                 });
                 expect(articles).to.be.descendingBy('created_at');

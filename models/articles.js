@@ -101,7 +101,7 @@ exports.selectArticles = (sort_by, order, {author, topic}) => {
     .leftJoin('comments', 'articles.article_id', 'comments.article_id')
     .count({comment_count: 'comments.comment_id'})
     .groupBy('articles.article_id')
-    .select('articles.*')
+    .select('articles.article_id', 'articles.author', 'articles.created_at', 'articles.title', 'articles.topic', 'articles.votes')
     .orderBy(sort_by || 'created_at', order || 'desc')
     .modify((query) => {
         if(author) query.where({'articles.author': author});
