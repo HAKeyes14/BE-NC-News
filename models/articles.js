@@ -91,6 +91,12 @@ exports.selectComments = (article_id, sort_by, order) => {
 }
 
 exports.selectArticles = (sort_by, order, {author, topic}) => {
+    if (order !== undefined && order !== 'asc' && order !== 'desc') {
+        return Promise.reject({
+            status: 400,
+            message: `Order: "${order}" is not allowed.`
+        });
+    }
     return connection('articles')
     .leftJoin('comments', 'articles.article_id', 'comments.article_id')
     .count({comment_count: 'comments.comment_id'})
@@ -101,4 +107,35 @@ exports.selectArticles = (sort_by, order, {author, topic}) => {
         if(author) query.where({'articles.author': author});
         if(topic) query.where({'articles.topic': topic});
     })
+    .then(articles => {
+        if (!articles.length) {
+            if (author) {
+                return connection('users')
+                .select('*')
+                .where({username: author})
+                .then(([user]) => {
+                    if(!user) {
+                        return Promise.reject({
+                            status: 400,
+                            message: `Author: ${author} does not exist.`
+                        });
+                    } 
+                });
+            }
+            if (topic) {
+                return connection('topics')
+                .select('*')
+                .where({slug: topic})
+                .then(([topics]) => {
+                    if(!topics) {
+                        return Promise.reject({
+                            status: 400,
+                            message: `Topic: ${topic} does not exist.`
+                        });
+                    }
+                });
+            }
+        }
+        return articles;
+    });
 }

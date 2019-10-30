@@ -121,8 +121,37 @@ describe('/api', () => {
             });
         });
         describe('ERRORS', () => {
-            it('', () => {
-                
+            it('GET: 400 - returns an error msg explaining that sort_by column does not exist', () => {
+                return request(app)
+                .get('/api/articles?sort_by=not-a-column')
+                .expect(400)
+                .then(({body:{msg}}) => {
+                    expect(msg).to.equal('column "not-a-column" does not exist');
+                });
+            });
+            it('GET: 400 - returns an error msg explaining that order must be asc or desc', () => {
+                return request(app)
+                .get('/api/articles?order=invalid')
+                .expect(400)
+                .then(({body:{msg}}) => {
+                    expect(msg).to.equal('Order: "invalid" is not allowed.');
+                });
+            });
+            it('GET: 400 - returns an error msg explaining that author is not in the database', () => {
+                return request(app)
+                .get('/api/articles?author=not-an-author')
+                .expect(400)
+                .then(({body:{msg}}) => {
+                    expect(msg).to.equal('Author: not-an-author does not exist.');
+                });
+            });
+            it('GET: 400 - returns an error msg explaining that topic is not in the database', () => {
+                return request(app)
+                .get('/api/articles?topic=not-a-topic')
+                .expect(400)
+                .then(({body:{msg}}) => {
+                    expect(msg).to.equal('Topic: not-a-topic does not exist.');
+                });
             });
         });
         describe('/:article_id', () => {
