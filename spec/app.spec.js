@@ -372,14 +372,63 @@ describe('/api', () => {
             });
         });
     describe('/comments', () => {
-        it('PATCH: 201 - returns a comment with the votes incremented by the amount on the body', () => {
-            return request(app)
-            .patch('/api/comments/1')
-            .send({inc_votes: 50})
-            .expect(201)
-            .then(({body: {comment}}) => {
-                expect(comment.comment_id).to.equal(1);
-                expect(comment.votes).to.equal(66);
+        describe('/:comment_id', () => {
+            it('PATCH: 201 - returns a comment with the votes incremented by the amount on the body', () => {
+                return request(app)
+                .patch('/api/comments/1')
+                .send({inc_votes: -1})
+                .expect(201)
+                .then(({body: {comment}}) => {
+                    expect(comment.comment_id).to.equal(1);
+                    expect(comment.votes).to.equal(15);
+                });
+            });
+            describe('ERRORS', () => {
+                it('PATCH: 400 - returns an error msg explaining inc_votes must be a number', () => {
+                    return request(app)
+                    .patch('/api/comments/2')
+                    .send({inc_votes: 'not-a-number'})
+                    .expect(400)
+                    .then(({body: {msg}}) => {
+                        expect(msg).to.equal('invalid input syntax for type integer: "NaN"');
+                    });
+                });
+                it('PATCH: 400 - returns an error msg explaining inc_votes must be on the body', () => {
+                    return request(app)
+                    .patch('/api/comments/2')
+                    .send({not_inc_votes: 100})
+                    .expect(400)
+                    .then(({body: {msg}}) => {
+                        expect(msg).to.equal('"inc_votes" must be included on the body in order to update "votes"');
+                    });
+                });
+                it('PATCH: 400 - returns an error msg explaining inc_votes must be the only thing on the body', () => {
+                    return request(app)
+                    .patch('/api/comments/2')
+                    .send({inc_votes: 100, not_inc_votes: 100})
+                    .expect(400)
+                    .then(({body: {msg}}) => {
+                        expect(msg).to.equal('"inc_votes" must be the only item on the body in order to update "votes"');
+                    });
+                });
+                it('PATCH: 404 - returns an error msg explaining the comment_id does not exist', () => {
+                    return request(app)
+                    .patch('/api/comments/10000')
+                    .send({inc_votes: 100})
+                    .expect(404)
+                    .then(({body: {msg}}) => {
+                        expect(msg).to.equal('Comment with comment_id: 10000 does not exist.');
+                    });
+                });
+                it('PATCH: 400 - returns an error msg explaining the comment_id is invalid', () => {
+                    return request(app)
+                    .patch('/api/comments/not-a-number')
+                    .send({inc_votes: 100})
+                    .expect(400)
+                    .then(({body: {msg}}) => {
+                        expect(msg).to.equal('invalid input syntax for type integer: "not-a-number"');
+                    });
+                });
             });
         });
     });

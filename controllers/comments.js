@@ -2,9 +2,10 @@ const {updateCommentVotes} = require('../models/comments');
 
 exports.patchCommentVotes = (req, res, next) => {
     const {comment_id} = req.params;
-    const {inc_votes} = req.body;
-    updateCommentVotes(comment_id, inc_votes)
+    const body = req.body;
+    updateCommentVotes(comment_id, body)
     .then(comment => {
         res.status(201).send({comment});
-    });
+    })
+    .catch(next);
 }
