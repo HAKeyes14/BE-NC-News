@@ -38,6 +38,10 @@ exports.psqlErrorHandler = (err, req, res, next) => {
 }
 
 exports.serverErrorHandler = (err, req, res, next) => {
-        res.status(500).send({msg: "something is wrong!"});
+    res.status(500).send({msg: "something is wrong!"});
 }
 
+exports.send405Error = (req, res, next) => {
+    res.status(405).send({ msg: 'method not allowed' });
+  };
+  

@@ -24,6 +24,19 @@ describe('/api', () => {
                 });
             });
         });
+        describe('ERRORS', () => {
+            it('INVALID METHODS: 405', () => {
+                const invalidMethods = ['patch', 'post', 'put', 'delete'];
+                const methodPromises = invalidMethods.map((method) => {
+                    return request(app)[method]('/api/topics')
+                    .expect(405)
+                    .then(({ body: { msg } }) => {
+                        expect(msg).to.equal('method not allowed');
+                    });
+                });
+                return Promise.all(methodPromises);
+            });
+        });
     });
     describe('/users', () => {
         describe('/:username', () => {
@@ -39,6 +52,17 @@ describe('/api', () => {
                 });
             });
             describe('ERRORS', () => {
+                it('INVALID METHODS: 405', () => {
+                    const invalidMethods = ['patch', 'post', 'put', 'delete'];
+                    const methodPromises = invalidMethods.map((method) => {
+                        return request(app)[method]('/api/users/1')
+                        .expect(405)
+                        .then(({ body: { msg } }) => {
+                            expect(msg).to.equal('method not allowed');
+                        });
+                    });
+                    return Promise.all(methodPromises);
+                });
                 it('GET: 404 - returns an error message if the username is valid but does not exist', () => {
                     return request(app)
                     .get('/api/users/not-a-username')
@@ -121,6 +145,17 @@ describe('/api', () => {
             });
         });
         describe('ERRORS', () => {
+            it('INVALID METHODS: 405', () => {
+                const invalidMethods = ['patch', 'post', 'put', 'delete'];
+                const methodPromises = invalidMethods.map((method) => {
+                    return request(app)[method]('/api/articles')
+                    .expect(405)
+                    .then(({ body: { msg } }) => {
+                        expect(msg).to.equal('method not allowed');
+                    });
+                });
+                return Promise.all(methodPromises);
+            });
             it('GET: 400 - returns an error msg explaining that sort_by column does not exist', () => {
                 return request(app)
                 .get('/api/articles?sort_by=not-a-column')
@@ -183,6 +218,17 @@ describe('/api', () => {
                     });
                 });
                 describe('ERRORS', () => {
+                    it('INVALID METHODS: 405', () => {
+                        const invalidMethods = ['delete', 'post', 'put'];
+                        const methodPromises = invalidMethods.map((method) => {
+                            return request(app)[method]('/api/articles/1')
+                            .expect(405)
+                            .then(({ body: { msg } }) => {
+                                expect(msg).to.equal('method not allowed');
+                            });
+                        });
+                        return Promise.all(methodPromises);
+                    });
                     it('GET: 400 - returns an error msg explaining the article_id is invalid', () => {
                         return request(app)
                         .get('/api/articles/hello')
@@ -299,6 +345,17 @@ describe('/api', () => {
                         });
                     });
                     describe('ERRORS', () => {
+                        it('INVALID METHODS: 405', () => {
+                            const invalidMethods = ['delete', 'patch', 'put'];
+                            const methodPromises = invalidMethods.map((method) => {
+                                return request(app)[method]('/api/articles/1/comments')
+                                .expect(405)
+                                .then(({ body: { msg } }) => {
+                                    expect(msg).to.equal('method not allowed');
+                                });
+                            });
+                            return Promise.all(methodPromises);
+                        });
                         it('POST: 400 - returns an error msg explaining the article_id is invalid', () => {
                             return request(app)
                             .post('/api/articles/not-a-number/comments')
@@ -389,6 +446,17 @@ describe('/api', () => {
                 .expect(204);
             });
             describe('ERRORS', () => {
+                it('INVALID METHODS: 405', () => {
+                    const invalidMethods = ['get', 'post', 'put'];
+                    const methodPromises = invalidMethods.map((method) => {
+                        return request(app)[method]('/api/comments/1')
+                        .expect(405)
+                        .then(({ body: { msg } }) => {
+                            expect(msg).to.equal('method not allowed');
+                        });
+                    });
+                    return Promise.all(methodPromises);
+                });
                 it('PATCH: 400 - returns an error msg explaining inc_votes must be a number', () => {
                     return request(app)
                     .patch('/api/comments/2')
