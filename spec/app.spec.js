@@ -521,5 +521,15 @@ describe('/api', () => {
             });
         });
     });
+    describe('ERRORS', () => {
+        it('ROUTE NOT FOUND: 404 - returns an errer msg explaining the route was not found', () => {
+            return request(app)
+            .get('/api/rticles')
+            .expect(404)
+            .then(({body: {msg}}) => {
+                expect(msg).to.equal('Route "/api/rticles" not found');
+            });
+        });
+    });
 });
 
