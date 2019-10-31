@@ -42,8 +42,8 @@ exports.getComments = (req, res, next) => {
 exports.getArticles = (req, res, next) => {
     const {sort_by, order, limit, p, ...query} = req.query;
     selectArticles(sort_by, order, limit, p, query)
-    .then(articles => {
-        res.status(200).send({articles});
+    .then(({articles, total_count}) => {
+        res.status(200).send({articles, total_count});
     })
     .catch(next);
 }

@@ -96,7 +96,15 @@ exports.selectArticles = (sort_by, order, limit, p, {author, topic}) => {
             message: `Order: "${order}" is not allowed.`
         });
     }
-    return connection('articles')
+    const total_count = connection('articles')
+    .select('*')
+    .modify((query) => {
+        if(author) query.where({'articles.author': author});
+        if(topic) query.where({'articles.topic': topic});
+    })
+    .then((total) => total.length);
+    
+    const articles = connection('articles')
     .leftJoin('comments', 'articles.article_id', 'comments.article_id')
     .count({comment_count: 'comments.comment_id'})
     .groupBy('articles.article_id')
@@ -138,5 +146,9 @@ exports.selectArticles = (sort_by, order, limit, p, {author, topic}) => {
             }
         }
         return articles;
+    });
+    return Promise.all([articles, total_count])
+    .then(([articles, total_count])=> {
+        return {articles, total_count};
     });
 }

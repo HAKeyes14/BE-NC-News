@@ -316,6 +316,18 @@ describe('/api', () => {
                 expect(articles).to.be.ascendingBy('article_id');
             });
         });
+        it('GET: 200 - body contains a total_count with the total number of articles', () => {
+            return request(app)
+            .get('/api/articles')
+            .expect(200)
+            .then(({body:{articles ,total_count}}) => {
+                expect(total_count).to.equal(12);
+                expect(articles).to.have.lengthOf(10);
+                articles.forEach(article => {
+                    expect(article).to.have.keys(['article_id', 'title', 'votes', 'created_at', 'comment_count', 'topic', 'author']);
+                });
+            });
+        });
         describe('ERRORS', () => {
             it('INVALID METHODS: 405', () => {
                 const invalidMethods = ['patch', 'post', 'put', 'delete'];
