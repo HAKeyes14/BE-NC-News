@@ -288,6 +288,34 @@ describe('/api', () => {
                 expect(articles).to.be.descendingBy('created_at');
             });
         });
+        it('GET: 200 - takes a page query, p, which offsets the results', () => {
+            return request(app)
+            .get('/api/articles?sort_by=article_id&order=asc&limit=5&p=2')
+            .expect(200)
+            .then(({body:{articles}}) => {
+                expect(articles).to.have.lengthOf(5);
+                expect(articles[0].article_id).to.equal(6);
+                expect(articles[4].article_id).to.equal(10);
+                articles.forEach(article => {
+                    expect(article).to.have.keys(['article_id', 'title', 'votes', 'created_at', 'comment_count', 'topic', 'author']);
+                });
+                expect(articles).to.be.ascendingBy('article_id');
+            });
+        });
+        it('GET: 200 - p defaults to 1', () => {
+            return request(app)
+            .get('/api/articles?sort_by=article_id&order=asc&limit=5')
+            .expect(200)
+            .then(({body:{articles}}) => {
+                expect(articles).to.have.lengthOf(5);
+                expect(articles[0].article_id).to.equal(1);
+                expect(articles[4].article_id).to.equal(5);
+                articles.forEach(article => {
+                    expect(article).to.have.keys(['article_id', 'title', 'votes', 'created_at', 'comment_count', 'topic', 'author']);
+                });
+                expect(articles).to.be.ascendingBy('article_id');
+            });
+        });
         describe('ERRORS', () => {
             it('INVALID METHODS: 405', () => {
                 const invalidMethods = ['patch', 'post', 'put', 'delete'];

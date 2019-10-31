@@ -40,8 +40,8 @@ exports.getComments = (req, res, next) => {
 }
 
 exports.getArticles = (req, res, next) => {
-    const {sort_by, order, limit, ...query} = req.query;
-    selectArticles(sort_by, order, limit, query)
+    const {sort_by, order, limit, p, ...query} = req.query;
+    selectArticles(sort_by, order, limit, p, query)
     .then(articles => {
         res.status(200).send({articles});
     })
