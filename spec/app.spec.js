@@ -412,9 +412,14 @@ describe('/api', () => {
                         expect(article.votes).to.equal(0);
                     });
                 });
+                it('DELETE: 204 - deletes the specified article', () => {
+                    return request(app)
+                    .delete('/api/articles/1')
+                    .expect(204)
+                });
                 describe('ERRORS', () => {
                     it('INVALID METHODS: 405', () => {
-                        const invalidMethods = ['delete', 'post', 'put'];
+                        const invalidMethods = ['post', 'put'];
                         const methodPromises = invalidMethods.map((method) => {
                             return request(app)[method]('/api/articles/1')
                             .expect(405)
@@ -449,15 +454,6 @@ describe('/api', () => {
                             expect(msg).to.equal('invalid input syntax for type integer: "NaN"');
                         });
                     });
-                    // it('PATCH: 400 - returns an error msg explaining inc_votes must be on the body', () => {
-                    //     return request(app)
-                    //     .patch('/api/articles/2')
-                    //     .send({not_inc_votes: 100})
-                    //     .expect(400)
-                    //     .then(({body: {msg}}) => {
-                    //         expect(msg).to.equal('"inc_votes" must be included on the body in order to update "votes"');
-                    //     });
-                    // });
                     it('PATCH: 400 - returns an error msg explaining inc_votes must be the only thing on the body', () => {
                         return request(app)
                         .patch('/api/articles/2')
@@ -484,6 +480,22 @@ describe('/api', () => {
                         .then(({body: {msg}}) => {
                             expect(msg).to.equal('invalid input syntax for type integer: "not-a-number"');
                         });
+                    });
+                    it('DELETE: 404 - returns an error msg explaining the article_id does not exist', () => {
+                        return request(app)
+                        .delete('/api/articles/1000000')
+                        .expect(404)
+                        .then(({body: {msg}}) => {
+                            expect(msg).to.equal('Article with article_id: 1000000 does not exist.')
+                        })
+                    });
+                    it('DELETE: 400 - returns an error msg explaining the article_id is invalid', () => {
+                        return request(app)
+                        .delete('/api/articles/not-a-number')
+                        .expect(400)
+                        .then(({body: {msg}}) => {
+                            expect(msg).to.equal('invalid input syntax for type integer: "not-a-number"')
+                        })
                     });
                 });
                 describe('/comments', () => {
@@ -671,15 +683,6 @@ describe('/api', () => {
                         expect(msg).to.equal('invalid input syntax for type integer: "NaN"');
                     });
                 });
-                // it('PATCH: 400 - returns an error msg explaining inc_votes must be on the body', () => {
-                //     return request(app)
-                //     .patch('/api/comments/2')
-                //     .send({not_inc_votes: 100})
-                //     .expect(400)
-                //     .then(({body: {msg}}) => {
-                //         expect(msg).to.equal('"inc_votes" must be included on the body in order to update "votes"');
-                //     });
-                // });
                 it('PATCH: 400 - returns an error msg explaining inc_votes must be the only thing on the body', () => {
                     return request(app)
                     .patch('/api/comments/2')

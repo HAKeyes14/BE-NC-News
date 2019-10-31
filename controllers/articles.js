@@ -1,4 +1,4 @@
-const {selectArticleById, updateArticleVotes, addComment, selectComments, selectArticles} = require('../models/articles');
+const {selectArticleById, updateArticleVotes, addComment, selectComments, selectArticles, removeArticle} = require('../models/articles');
 
 exports.getArticleById = (req, res, next) => {
     const {article_id} = req.params; 
@@ -44,6 +44,15 @@ exports.getArticles = (req, res, next) => {
     selectArticles(sort_by, order, limit, p, query)
     .then(({articles, total_count}) => {
         res.status(200).send({articles, total_count});
+    })
+    .catch(next);
+}
+
+exports.deleteArticle = (req, res, next) => {
+    const {article_id} = req.params;
+    removeArticle(article_id)
+    .then(() => {
+        res.sendStatus(204);
     })
     .catch(next);
 }
