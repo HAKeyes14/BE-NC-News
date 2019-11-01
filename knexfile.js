@@ -8,8 +8,7 @@ const baseConfig = {
   },
   seeds: {
     directory: './db/seeds'
-  },
-  JWT_SECRET: 'secret key'
+  }
 };
 
 const customConfig = {

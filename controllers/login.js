@@ -1,5 +1,6 @@
 const {selectUserByUsername} = require('../models/login');
 const jwt = require('jsonwebtoken');
+const {JWT_SECRET} = require('../config');
 
 exports.sendToken = (req, res, next) => {
     const {username, password} = req.body;
@@ -14,7 +15,8 @@ exports.sendToken = (req, res, next) => {
             );
             res.send({ token });
         }
-    });
+    })
+    .catch(next);
 }
 
 exports.authorise = (req, res, next) => {
