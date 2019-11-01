@@ -1,19 +1,24 @@
 const {selectUserByUsername} = require('../models/login');
 const jwt = require('jsonwebtoken');
 const {JWT_SECRET} = require('../config');
+const bcrypt = require('bcrypt');
 
 exports.sendToken = (req, res, next) => {
     const {username, password} = req.body;
     selectUserByUsername(username)
     .then(user => {
-        if(!user || password !== user.password) {
-            next({ status: 401, message: 'Invalid username or password.' });
-        } else {
+        if (user) return Promise.all([bcrypt.compare(password, user.password), user]);
+        else next({ status: 401, message: 'Invalid username or password.' });
+    })
+    .then(([passwordOk, user]) => {
+        if (user && passwordOk) {
             const token = jwt.sign(
                 { user: user.username, iat: Date.now() },
                 JWT_SECRET
             );
             res.send({ token });
+        } else {
+            next({ status: 401, message: 'Invalid username or password.' });
         }
     })
     .catch(next);
@@ -25,5 +30,5 @@ exports.authorise = (req, res, next) => {
     jwt.verify(token, JWT_SECRET, (err, res) => {
         if (err) next({ status: 401, message: 'Unauthorised' });
         else next();
-    });
+    })
 };

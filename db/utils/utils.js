@@ -1,3 +1,5 @@
+const bcrypt = require('bcrypt');
+
 const formatDates = list => {
     const formattedArr = list.map(obj => {
         const formattedObj = {...obj};
@@ -32,4 +34,11 @@ const formatComments = (comments, articleRef) => {
     return dateFormattedComments;
 };
 
-module.exports = {formatDates, makeRefObj, formatComments}
+const formatUsers = (rawUsers) => {
+    return rawUsers.map(user => ({
+      ...user,
+      password: bcrypt.hashSync('password', 10)
+    }));
+  };
+
+module.exports = {formatDates, makeRefObj, formatComments, formatUsers}
