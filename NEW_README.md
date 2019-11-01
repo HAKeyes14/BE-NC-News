@@ -2,6 +2,8 @@
 
 A project for a news site for posting articles about particular topics. Each user is able to post articles as well as comment on articles.
 
+Hosted at: **https://nc-news-hkeyes.herokuapp.com**
+
 ## Getting Started  
 
 Follow these steps to get the app up and running:  
