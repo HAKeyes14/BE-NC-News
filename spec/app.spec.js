@@ -137,6 +137,37 @@ describe('/api', () => {
             )
         });
     });
+    describe('/login', () => {
+        it('POST: 200 - responds with an access token given correct username and password', () => {
+            request(app)
+            .post('/api/login')
+            .send({ username: 'butter_bridge', password: 'password' })
+            .expect(200)
+            .then(({ body }) => {
+                expect(body).to.have.ownProperty('token');
+            });
+        });
+        describe('ERRORS', () => {
+            it('POST: 401 - responds with status 401 for an incorrect password', () => {
+                request(app)
+                .post('/api/login')
+                .send({ username: 'butter_bridge', password: 'not-a-password' })
+                .expect(401)
+                .then(({ body: { msg } }) => {
+                    expect(msg).to.equal('Invalid username or password.');
+                });
+            });
+            it('POST: 401 - responds with status 401 for an incorrect username', () => {
+                request(app)
+                .post('/api/login')
+                .send({ username: 'not-a-username', password: 'password' })
+                .expect(401)
+                .then(({ body: { msg } }) => {
+                    expect(msg).to.equal('Invalid username or password.');
+                });
+            });
+        });
+    });
     describe('/topics', () => {
         it('GET: 200 - returns an array of all the topics', () => {
             return request(app)
@@ -170,7 +201,7 @@ describe('/api', () => {
                 .get('/api/users/butter_bridge')
                 .expect(200)
                 .then(({body: {user}}) => {
-                    expect(user).to.have.keys(['username', 'avatar_url', 'name']);
+                    expect(user).to.have.keys(['username', 'avatar_url', 'name', 'password']);
                     expect(user.username).to.equal('butter_bridge');
                     expect(user.name).to.equal('jonny');
                     expect(user.avatar_url).to.equal('https://www.healthytherapies.com/wp-content/uploads/2016/06/Lime3.jpg');
@@ -454,15 +485,6 @@ describe('/api', () => {
                             expect(msg).to.equal('invalid input syntax for type integer: "NaN"');
                         });
                     });
-                    it('PATCH: 400 - returns an error msg explaining inc_votes must be the only thing on the body', () => {
-                        return request(app)
-                        .patch('/api/articles/2')
-                        .send({inc_votes: 100, not_inc_votes: 100})
-                        .expect(400)
-                        .then(({body: {msg}}) => {
-                            expect(msg).to.equal('"inc_votes" must be the only item on the body in order to update "votes"');
-                        });
-                    });
                     it('PATCH: 404 - returns an error msg explaining the article_id does not exist', () => {
                         return request(app)
                         .patch('/api/articles/10000')
@@ -681,15 +703,6 @@ describe('/api', () => {
                     .expect(400)
                     .then(({body: {msg}}) => {
                         expect(msg).to.equal('invalid input syntax for type integer: "NaN"');
-                    });
-                });
-                it('PATCH: 400 - returns an error msg explaining inc_votes must be the only thing on the body', () => {
-                    return request(app)
-                    .patch('/api/comments/2')
-                    .send({inc_votes: 100, not_inc_votes: 100})
-                    .expect(400)
-                    .then(({body: {msg}}) => {
-                        expect(msg).to.equal('"inc_votes" must be the only item on the body in order to update "votes"');
                     });
                 });
                 it('PATCH: 404 - returns an error msg explaining the comment_id does not exist', () => {
