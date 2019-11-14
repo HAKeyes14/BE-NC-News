@@ -1,5 +1,5 @@
-console.log(process.env)
-const { DB_URL } = process.env;
+const { DB_URL, JWT_SECRET } = process.env;
+console.log(DB_URL, JWT_SECRET)
 const ENV = process.env.NODE_ENV || 'development';
 
 const baseConfig = {
