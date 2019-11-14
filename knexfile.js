@@ -1,3 +1,4 @@
+console.log(process.env)
 const { DB_URL } = process.env;
 const ENV = process.env.NODE_ENV || 'development';
 
