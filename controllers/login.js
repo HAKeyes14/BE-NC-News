@@ -26,6 +26,8 @@ exports.sendToken = (req, res, next) => {
 
 exports.authorise = (req, res, next) => {
     const { authorization } = req.headers;
+    console.log(req)
+    console.log(req.headers)
     const token = authorization.split(' ')[1];
     jwt.verify(token, JWT_SECRET, (err, res) => {
         if (err) next({ status: 401, message: 'Unauthorised' });
