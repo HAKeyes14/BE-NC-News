@@ -2,7 +2,7 @@ const {selectUserByUsername} = require('../models/login');
 const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET || require('../config').JWT_SECRET;
 const bcrypt = require('bcrypt');
-
+console.log(JWT_SECRET)
 exports.sendToken = (req, res, next) => {
     const {username, password} = req.body;
     selectUserByUsername(username)
