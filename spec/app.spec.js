@@ -1,7 +1,6 @@
 process.env.NODE_ENV = 'test';
 const app = require('../app');
-const defaults = require('superagent-defaults');
-const request = defaults(require('supertest')(app));
+const request = require('supertest');
 const chai = require('chai');
 const {expect} = require('chai');
 const chaiSorted = require('chai-sorted');
@@ -11,23 +10,11 @@ chai.use(chaiSorted);
 
 describe('/api', () => {
     beforeEach(() => {
-        return connection.migrate
-        .rollback()
-        .then(() => connection.migrate.latest())
-        .then(() => connection.seed.run())
-        .then(() => {
-            return request
-            .post('/api/login')
-            .expect(200)
-            .send({ username: 'butter_bridge', password: 'password' })
-        })
-        .then(({ body: { token } }) => {
-            request.set('Authorization', `BEARER ${token}`);
-        });
+        return connection.seed.run();
     });
     after(() => connection.destroy());
     it('GET: 200 - returns a JSON describing all the available endpoints on the API', () => {
-        return request
+        return request(app)
         .get('/api')
         .expect(200)
         .then(({body: {endpoints}}) => {
@@ -151,40 +138,9 @@ describe('/api', () => {
             )
         });
     });
-    describe('/login', () => {
-        it('POST: 200 - responds with an access token given correct username and password', () => {
-            request
-            .post('/api/login')
-            .send({ username: 'butter_bridge', password: 'password' })
-            .expect(200)
-            .then(({ body }) => {
-                expect(body).to.have.ownProperty('token');
-            });
-        });
-        describe('ERRORS', () => {
-            it('POST: 401 - responds with status 401 for an incorrect password', () => {
-                request
-                .post('/api/login')
-                .send({ username: 'butter_bridge', password: 'not-a-password' })
-                .expect(401)
-                .then(({ body: { msg } }) => {
-                    expect(msg).to.equal('Invalid username or password.');
-                });
-            });
-            it('POST: 401 - responds with status 401 for an incorrect username', () => {
-                request
-                .post('/api/login')
-                .send({ username: 'not-a-username', password: 'password' })
-                .expect(401)
-                .then(({ body: { msg } }) => {
-                    expect(msg).to.equal('Invalid username or password.');
-                });
-            });
-        });
-    });
     describe('/topics', () => {
         it('GET: 200 - returns an array of all the topics', () => {
-            return request
+            return request(app)
             .get('/api/topics')
             .expect(200)
             .then(({body: {topics}}) => {
@@ -198,7 +154,7 @@ describe('/api', () => {
             it('INVALID METHODS: 405', () => {
                 const invalidMethods = ['patch', 'post', 'put', 'delete'];
                 const methodPromises = invalidMethods.map((method) => {
-                    return request[method]('/api/topics')
+                    return request(app)[method]('/api/topics')
                     .expect(405)
                     .then(({ body: { msg } }) => {
                         expect(msg).to.equal('method not allowed');
@@ -206,21 +162,12 @@ describe('/api', () => {
                 });
                 return Promise.all(methodPromises);
             });
-            it('GET: 401 - return a not authorised message', () => {
-                return request
-                .get('/api/topics')
-                .set('Authorization', ``)
-                .expect(401)
-                .then(({ body: { msg } }) => {
-                    expect(msg).to.equal('Unauthorised');
-                });
-            });
         });
     });
     describe('/users', () => {
         describe('/:username', () => {
             it('GET: 200 - returns the specified user object', () => {
-                return request
+                return request(app)
                 .get('/api/users/butter_bridge')
                 .expect(200)
                 .then(({body: {user}}) => {
@@ -234,7 +181,7 @@ describe('/api', () => {
                 it('INVALID METHODS: 405', () => {
                     const invalidMethods = ['patch', 'post', 'put', 'delete'];
                     const methodPromises = invalidMethods.map((method) => {
-                        return request[method]('/api/users/1')
+                        return request(app)[method]('/api/users/1')
                         .expect(405)
                         .then(({ body: { msg } }) => {
                             expect(msg).to.equal('method not allowed');
@@ -243,7 +190,7 @@ describe('/api', () => {
                     return Promise.all(methodPromises);
                 });
                 it('GET: 404 - returns an error message if the username is valid but does not exist', () => {
-                    return request
+                    return request(app)
                     .get('/api/users/not-a-username')
                     .expect(404)
                     .then(({body: {msg}}) => {
@@ -251,7 +198,7 @@ describe('/api', () => {
                     });
                 });
                 it('GET: 400 - returns an error message if the username is invalid', () => {
-                    return request
+                    return request(app)
                     .get('/api/users/this-username-is-longer-than-twenty-characters')
                     .expect(400)
                     .then(({body: {msg}}) => {
@@ -263,7 +210,7 @@ describe('/api', () => {
     });
     describe('/articles', () => {
         it('GET: 200 - returns an array of all articles and their comment counts', () => {
-            return request
+            return request(app)
             .get('/api/articles')
             .expect(200)
             .then(({body:{articles}}) => {
@@ -273,7 +220,7 @@ describe('/api', () => {
             });
         });
         it('GET: 200 - returns an array of all articles and their comment counts sorted by descending date by default', () => {
-            return request
+            return request(app)
             .get('/api/articles')
             .expect(200)
             .then(({body:{articles}}) => {
@@ -284,7 +231,7 @@ describe('/api', () => {
             });
         });
         it('GET: 200 - returns an array of all articles and their comment counts sorted as specified by the query', () => {
-            return request
+            return request(app)
             .get('/api/articles?sort_by=votes&order=asc')
             .expect(200)
             .then(({body:{articles}}) => {
@@ -295,7 +242,7 @@ describe('/api', () => {
             });
         });
         it('GET: 200 - returns an array of all articles and their comment counts with the author specified by the query', () => {
-            return request
+            return request(app)
             .get('/api/articles?author=butter_bridge')
             .expect(200)
             .then(({body:{articles}}) => {
@@ -307,7 +254,7 @@ describe('/api', () => {
             });
         });
         it('GET: 200 - returns an array of all articles and their comment counts with the topic specified by the query', () => {
-            return request
+            return request(app)
             .get('/api/articles?topic=mitch')
             .expect(200)
             .then(({body:{articles}}) => {
@@ -319,7 +266,7 @@ describe('/api', () => {
             });
         });
         it('GET: 200 - takes a limit query which limits the number of results displayed', () => {
-            return request
+            return request(app)
             .get('/api/articles?limit=5')
             .expect(200)
             .then(({body:{articles}}) => {
@@ -331,7 +278,7 @@ describe('/api', () => {
             });
         });
         it('GET: 200 - the limit defaults to 10', () => {
-            return request
+            return request(app)
             .get('/api/articles')
             .expect(200)
             .then(({body:{articles}}) => {
@@ -343,7 +290,7 @@ describe('/api', () => {
             });
         });
         it('GET: 200 - takes a page query, p, which offsets the results', () => {
-            return request
+            return request(app)
             .get('/api/articles?sort_by=article_id&order=asc&limit=5&p=2')
             .expect(200)
             .then(({body:{articles}}) => {
@@ -357,7 +304,7 @@ describe('/api', () => {
             });
         });
         it('GET: 200 - p defaults to 1', () => {
-            return request
+            return request(app)
             .get('/api/articles?sort_by=article_id&order=asc&limit=5')
             .expect(200)
             .then(({body:{articles}}) => {
@@ -371,7 +318,7 @@ describe('/api', () => {
             });
         });
         it('GET: 200 - body contains a total_count with the total number of articles', () => {
-            return request
+            return request(app)
             .get('/api/articles')
             .expect(200)
             .then(({body:{articles ,total_count}}) => {
@@ -386,7 +333,7 @@ describe('/api', () => {
             it('INVALID METHODS: 405', () => {
                 const invalidMethods = ['patch', 'post', 'put', 'delete'];
                 const methodPromises = invalidMethods.map((method) => {
-                    return request[method]('/api/articles')
+                    return request(app)[method]('/api/articles')
                     .expect(405)
                     .then(({ body: { msg } }) => {
                         expect(msg).to.equal('method not allowed');
@@ -395,7 +342,7 @@ describe('/api', () => {
                 return Promise.all(methodPromises);
             });
             it('GET: 400 - returns an error msg explaining that sort_by column does not exist', () => {
-                return request
+                return request(app)
                 .get('/api/articles?sort_by=not-a-column')
                 .expect(400)
                 .then(({body:{msg}}) => {
@@ -403,7 +350,7 @@ describe('/api', () => {
                 });
             });
             it('GET: 400 - returns an error msg explaining that order must be asc or desc', () => {
-                return request
+                return request(app)
                 .get('/api/articles?order=invalid')
                 .expect(400)
                 .then(({body:{msg}}) => {
@@ -411,7 +358,7 @@ describe('/api', () => {
                 });
             });
             it('GET: 400 - returns an error msg explaining that author is not in the database', () => {
-                return request
+                return request(app)
                 .get('/api/articles?author=not-an-author')
                 .expect(404)
                 .then(({body:{msg}}) => {
@@ -419,7 +366,7 @@ describe('/api', () => {
                 });
             });
             it('GET: 400 - returns an error msg explaining that topic is not in the database', () => {
-                return request
+                return request(app)
                 .get('/api/articles?topic=not-a-topic')
                 .expect(404)
                 .then(({body:{msg}}) => {
@@ -429,7 +376,7 @@ describe('/api', () => {
         });
         describe('/:article_id', () => {
             it('GET: 200 - returns the specified article and the comment count', () => {
-                return request
+                return request(app)
                     .get('/api/articles/1')
                     .expect(200)
                     .then(({body: {article}}) => {
@@ -445,7 +392,7 @@ describe('/api', () => {
                     });
                 });
                 it('PATCH: 200 - returns the article with the votes updated', () => {
-                    return request
+                    return request(app)
                     .patch('/api/articles/2')
                     .send({inc_votes: 100})
                     .expect(200)
@@ -456,7 +403,7 @@ describe('/api', () => {
                     });
                 });
                 it('PATCH: 200 - returns the unchanged article if inc_votes is not on the body', () => {
-                    return request
+                    return request(app)
                     .patch('/api/articles/2')
                     .send({not_inc_votes: 100})
                     .expect(200)
@@ -467,7 +414,7 @@ describe('/api', () => {
                     });
                 });
                 it('DELETE: 204 - deletes the specified article', () => {
-                    return request
+                    return request(app)
                     .delete('/api/articles/1')
                     .expect(204)
                 });
@@ -475,7 +422,7 @@ describe('/api', () => {
                     it('INVALID METHODS: 405', () => {
                         const invalidMethods = ['post', 'put'];
                         const methodPromises = invalidMethods.map((method) => {
-                            return request[method]('/api/articles/1')
+                            return request(app)[method]('/api/articles/1')
                             .expect(405)
                             .then(({ body: { msg } }) => {
                                 expect(msg).to.equal('method not allowed');
@@ -484,7 +431,7 @@ describe('/api', () => {
                         return Promise.all(methodPromises);
                     });
                     it('GET: 400 - returns an error msg explaining the article_id is invalid', () => {
-                        return request
+                        return request(app)
                         .get('/api/articles/hello')
                         .expect(400)
                         .then(({body: {msg}}) => {
@@ -492,7 +439,7 @@ describe('/api', () => {
                         });
                     });
                     it('GET: 404 - returns an error msg explaining the article_id does not exist', () => {
-                        return request
+                        return request(app)
                         .get('/api/articles/1000000')
                         .expect(404)
                         .then(({body: {msg}}) => {
@@ -500,7 +447,7 @@ describe('/api', () => {
                         });
                     });
                     it('PATCH: 400 - returns an error msg explaining inc_votes must be a number', () => {
-                        return request
+                        return request(app)
                         .patch('/api/articles/2')
                         .send({inc_votes: 'not-a-number'})
                         .expect(400)
@@ -509,7 +456,7 @@ describe('/api', () => {
                         });
                     });
                     it('PATCH: 404 - returns an error msg explaining the article_id does not exist', () => {
-                        return request
+                        return request(app)
                         .patch('/api/articles/10000')
                         .send({inc_votes: 100})
                         .expect(404)
@@ -518,7 +465,7 @@ describe('/api', () => {
                         });
                     });
                     it('PATCH: 400 - returns an error msg explaining the article_id is invalid', () => {
-                        return request
+                        return request(app)
                         .patch('/api/articles/not-a-number')
                         .send({inc_votes: 100})
                         .expect(400)
@@ -527,7 +474,7 @@ describe('/api', () => {
                         });
                     });
                     it('DELETE: 404 - returns an error msg explaining the article_id does not exist', () => {
-                        return request
+                        return request(app)
                         .delete('/api/articles/1000000')
                         .expect(404)
                         .then(({body: {msg}}) => {
@@ -535,7 +482,7 @@ describe('/api', () => {
                         })
                     });
                     it('DELETE: 400 - returns an error msg explaining the article_id is invalid', () => {
-                        return request
+                        return request(app)
                         .delete('/api/articles/not-a-number')
                         .expect(400)
                         .then(({body: {msg}}) => {
@@ -545,7 +492,7 @@ describe('/api', () => {
                 });
                 describe('/comments', () => {
                     it('POST: 201 - returns the added comment', () => {
-                        return request
+                        return request(app)
                         .post('/api/articles/1/comments')
                         .send({username: 'butter_bridge', body: 'hello, this is the body'})
                         .expect(201)
@@ -559,7 +506,7 @@ describe('/api', () => {
                         });
                     });
                     it('GET: 200 - returns an array of all comments for the specified article', () => {
-                        return request
+                        return request(app)
                         .get('/api/articles/1/comments')
                         .expect(200)
                         .then(({body: {comments}}) => {
@@ -571,7 +518,7 @@ describe('/api', () => {
                         });
                     });
                     it('GET: 200 - returns an array of all comments for the specified article sorted by descending and created at by default', () => {
-                        return request
+                        return request(app)
                         .get('/api/articles/1/comments')
                         .expect(200)
                         .then(({body: {comments}}) => {
@@ -584,7 +531,7 @@ describe('/api', () => {
                         });
                     });
                     it('GET: 200 - returns an array of all comments for the specified article sorted as specified in the query', () => {
-                        return request
+                        return request(app)
                         .get('/api/articles/1/comments?sort_by=comment_id&order=asc')
                         .expect(200)
                         .then(({body: {comments}}) => {
@@ -600,7 +547,7 @@ describe('/api', () => {
                         it('INVALID METHODS: 405', () => {
                             const invalidMethods = ['delete', 'patch', 'put'];
                             const methodPromises = invalidMethods.map((method) => {
-                                return request[method]('/api/articles/1/comments')
+                                return request(app)[method]('/api/articles/1/comments')
                                 .expect(405)
                                 .then(({ body: { msg } }) => {
                                     expect(msg).to.equal('method not allowed');
@@ -609,7 +556,7 @@ describe('/api', () => {
                             return Promise.all(methodPromises);
                         });
                         it('POST: 400 - returns an error msg explaining the article_id is invalid', () => {
-                            return request
+                            return request(app)
                             .post('/api/articles/not-a-number/comments')
                             .send({username: 'butter_bridge', body: 'hello, this is the body'})
                             .expect(400)
@@ -618,7 +565,7 @@ describe('/api', () => {
                             });
                         });
                         it('POST: 404 - returns an error msg explaining the article_id does not exist', () => {
-                            return request
+                            return request(app)
                             .post('/api/articles/100000/comments')
                             .send({username: 'butter_bridge', body: 'hello, this is the body'})
                             .expect(404)
@@ -627,7 +574,7 @@ describe('/api', () => {
                             });
                         });
                         it('POST: 400 - returns an error msg explaining there is no body on the body', () => {
-                            return request
+                            return request(app)
                             .post('/api/articles/1/comments')
                             .send({username: 'butter_bridge'})
                             .expect(400)
@@ -636,7 +583,7 @@ describe('/api', () => {
                             });
                         });
                         it('POST: 400 - returns an error msg explaining there is no username on the body', () => {
-                            return request
+                            return request(app)
                             .post('/api/articles/1/comments')
                             .send({body: 'this is the body'})
                             .expect(400)
@@ -645,7 +592,7 @@ describe('/api', () => {
                             });
                         });
                         it('GET: 404 - returns an err msg if the article_id does not exist', () => {
-                            return request
+                            return request(app)
                             .get('/api/articles/1000000/comments')
                             .expect(404)
                             .then(({body: {msg}}) => {
@@ -653,7 +600,7 @@ describe('/api', () => {
                             });
                         });
                         it('GET: 400 - returns an err msg if the article_id is invalid', () => {
-                            return request
+                            return request(app)
                             .get('/api/articles/not-a-number/comments')
                             .expect(400)
                             .then(({body: {msg}}) => {
@@ -661,7 +608,7 @@ describe('/api', () => {
                             });
                         });
                         it('GET: 400 - returns an err msg if the sort_by column does not exist', () => {
-                            return request
+                            return request(app)
                             .get('/api/articles/1/comments?sort_by=not-a-column')
                             .expect(400)
                             .then(({body: {msg}}) => {
@@ -669,7 +616,7 @@ describe('/api', () => {
                             });
                         });
                         it('GET: 400 - returns an err msg if order is not asc or desc', () => {
-                            return request
+                            return request(app)
                             .get('/api/articles/1/comments?order=invalid')
                             .expect(400)
                             .then(({body: {msg}}) => {
@@ -683,7 +630,7 @@ describe('/api', () => {
     describe('/comments', () => {
         describe('/:comment_id', () => {
             it('PATCH: 200 - returns a comment with the votes incremented by the amount on the body', () => {
-                return request
+                return request(app)
                 .patch('/api/comments/1')
                 .send({inc_votes: -1})
                 .expect(200)
@@ -693,7 +640,7 @@ describe('/api', () => {
                 });
             });
             it('PATCH: 200 - returns an unchanged comment if inc_votes is not on the body', () => {
-                return request
+                return request(app)
                 .patch('/api/comments/1')
                 .send({not_inc_votes: 20})
                 .expect(200)
@@ -703,7 +650,7 @@ describe('/api', () => {
                 });
             });
             it('DELETE: 204', () => {
-                return request
+                return request(app)
                 .delete('/api/comments/1')
                 .expect(204);
             });
@@ -711,7 +658,7 @@ describe('/api', () => {
                 it('INVALID METHODS: 405', () => {
                     const invalidMethods = ['get', 'post', 'put'];
                     const methodPromises = invalidMethods.map((method) => {
-                        return request[method]('/api/comments/1')
+                        return request(app)[method]('/api/comments/1')
                         .expect(405)
                         .then(({ body: { msg } }) => {
                             expect(msg).to.equal('method not allowed');
@@ -720,7 +667,7 @@ describe('/api', () => {
                     return Promise.all(methodPromises);
                 });
                 it('PATCH: 400 - returns an error msg explaining inc_votes must be a number', () => {
-                    return request
+                    return request(app)
                     .patch('/api/comments/2')
                     .send({inc_votes: 'not-a-number'})
                     .expect(400)
@@ -729,7 +676,7 @@ describe('/api', () => {
                     });
                 });
                 it('PATCH: 404 - returns an error msg explaining the comment_id does not exist', () => {
-                    return request
+                    return request(app)
                     .patch('/api/comments/10000')
                     .send({inc_votes: 100})
                     .expect(404)
@@ -738,7 +685,7 @@ describe('/api', () => {
                     });
                 });
                 it('PATCH: 400 - returns an error msg explaining the comment_id is invalid', () => {
-                    return request
+                    return request(app)
                     .patch('/api/comments/not-a-number')
                     .send({inc_votes: 100})
                     .expect(400)
@@ -747,7 +694,7 @@ describe('/api', () => {
                     });
                 });
                 it('DELETE: 404 - returns an error msg explaining the comment_id does not exist', () => {
-                    return request
+                    return request(app)
                     .delete('/api/comments/1000000')
                     .expect(404)
                     .then(({body: {msg}}) => {
@@ -755,7 +702,7 @@ describe('/api', () => {
                     })
                 });
                 it('DELETE: 400 - returns an error msg explaining the comment_id is invalid', () => {
-                    return request
+                    return request(app)
                     .delete('/api/comments/not-a-number')
                     .expect(400)
                     .then(({body: {msg}}) => {
@@ -769,7 +716,7 @@ describe('/api', () => {
         it('INVALID METHODS: 405', () => {
             const invalidMethods = ['patch', 'post', 'put', 'delete'];
             const methodPromises = invalidMethods.map((method) => {
-                return request[method]('/api')
+                return request(app)[method]('/api')
                 .expect(405)
                 .then(({ body: { msg } }) => {
                     expect(msg).to.equal('method not allowed');
@@ -778,7 +725,7 @@ describe('/api', () => {
             return Promise.all(methodPromises);
         });
         it('ROUTE NOT FOUND: 404 - returns an errer msg explaining the route was not found', () => {
-            return request
+            return request(app)
             .get('/api/rticles')
             .expect(404)
             .then(({body: {msg}}) => {
